@@ -1,0 +1,162 @@
+.
+├── README.md
+├── analysis_options.yaml
+├── android
+│   ├── app
+│   │   ├── build.gradle.kts
+│   │   └── src
+│   │       ├── debug
+│   │       │   └── AndroidManifest.xml
+│   │       ├── main
+│   │       │   ├── AndroidManifest.xml
+│   │       │   ├── java
+│   │       │   │   └── io
+│   │       │   │       └── flutter
+│   │       │   │           └── plugins
+│   │       │   │               └── GeneratedPluginRegistrant.java
+│   │       │   ├── kotlin
+│   │       │   │   └── com
+│   │       │   │       └── gabo
+│   │       │   │           └── kgl_express
+│   │       │   │               └── MainActivity.kt
+│   │       │   └── res
+│   │       │       ├── drawable
+│   │       │       │   └── launch_background.xml
+│   │       │       ├── drawable-v21
+│   │       │       │   └── launch_background.xml
+│   │       │       ├── mipmap-hdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-mdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxxhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── values
+│   │       │       │   └── styles.xml
+│   │       │       └── values-night
+│   │       │           └── styles.xml
+│   │       └── profile
+│   │           └── AndroidManifest.xml
+│   ├── build.gradle.kts
+│   ├── gradle
+│   │   └── wrapper
+│   │       ├── gradle-wrapper.jar
+│   │       └── gradle-wrapper.properties
+│   ├── gradle.properties
+│   ├── gradlew
+│   ├── gradlew.bat
+│   ├── kgl_express_android.iml
+│   ├── local.properties
+│   └── settings.gradle.kts
+├── assets
+│   ├── icons
+│   └── images
+├── ios
+│   ├── Flutter
+│   │   ├── AppFrameworkInfo.plist
+│   │   ├── Debug.xcconfig
+│   │   └── Release.xcconfig
+│   ├── Podfile
+│   ├── Runner
+│   │   ├── AppDelegate.swift
+│   │   ├── Assets.xcassets
+│   │   │   ├── AppIcon.appiconset
+│   │   │   │   ├── Contents.json
+│   │   │   │   ├── Icon-App-1024x1024@1x.png
+│   │   │   │   ├── Icon-App-20x20@1x.png
+│   │   │   │   ├── Icon-App-20x20@2x.png
+│   │   │   │   ├── Icon-App-20x20@3x.png
+│   │   │   │   ├── Icon-App-29x29@1x.png
+│   │   │   │   ├── Icon-App-29x29@2x.png
+│   │   │   │   ├── Icon-App-29x29@3x.png
+│   │   │   │   ├── Icon-App-40x40@1x.png
+│   │   │   │   ├── Icon-App-40x40@2x.png
+│   │   │   │   ├── Icon-App-40x40@3x.png
+│   │   │   │   ├── Icon-App-60x60@2x.png
+│   │   │   │   ├── Icon-App-60x60@3x.png
+│   │   │   │   ├── Icon-App-76x76@1x.png
+│   │   │   │   ├── Icon-App-76x76@2x.png
+│   │   │   │   └── Icon-App-83.5x83.5@2x.png
+│   │   │   └── LaunchImage.imageset
+│   │   │       ├── Contents.json
+│   │   │       ├── LaunchImage.png
+│   │   │       ├── LaunchImage@2x.png
+│   │   │       ├── LaunchImage@3x.png
+│   │   │       └── README.md
+│   │   ├── Base.lproj
+│   │   │   ├── LaunchScreen.storyboard
+│   │   │   └── Main.storyboard
+│   │   ├── GeneratedPluginRegistrant.h
+│   │   ├── GeneratedPluginRegistrant.m
+│   │   ├── Info.plist
+│   │   └── Runner-Bridging-Header.h
+│   ├── Runner.xcodeproj
+│   │   ├── project.pbxproj
+│   │   ├── project.xcworkspace
+│   │   │   ├── contents.xcworkspacedata
+│   │   │   └── xcshareddata
+│   │   │       ├── IDEWorkspaceChecks.plist
+│   │   │       ├── WorkspaceSettings.xcsettings
+│   │   │       └── swiftpm
+│   │   │           └── configuration
+│   │   └── xcshareddata
+│   │       └── xcschemes
+│   │           └── Runner.xcscheme
+│   ├── Runner.xcworkspace
+│   │   ├── contents.xcworkspacedata
+│   │   └── xcshareddata
+│   │       ├── IDEWorkspaceChecks.plist
+│   │       ├── WorkspaceSettings.xcsettings
+│   │       └── swiftpm
+│   │           └── configuration
+│   └── RunnerTests
+│       └── RunnerTests.swift
+├── lib
+│   ├── core
+│   │   ├── constants
+│   │   │   └── app_constants.dart
+│   │   ├── enums
+│   │   │   ├── order_status.dart
+│   │   │   └── user_role.dart
+│   │   ├── services
+│   │   │   ├── gps_service.dart
+│   │   │   └── map_service.dart
+│   │   └── theme
+│   │       └── app_theme.dart
+│   ├── features
+│   │   ├── auth
+│   │   │   ├── data
+│   │   │   └── presentation
+│   │   ├── driver
+│   │   │   ├── logic
+│   │   │   └── presentation
+│   │   │       ├── live_map_screen.dart
+│   │   │       └── order_request_screen.dart
+│   │   ├── receiver
+│   │   │   ├── logic
+│   │   │   └── presentation
+│   │   │       ├── confirmation_dialog.dart
+│   │   │       └── incoming_delivery_screen.dart
+│   │   └── sender
+│   │       ├── logic
+│   │       │   └── order_splitter.dart
+│   │       └── presentation
+│   │           ├── create_order_screen.dart
+│   │           └── package_list_widget.dart
+│   ├── main.dart
+│   ├── models
+│   │   ├── order_model.dart
+│   │   ├── package_model.dart
+│   │   └── user_model.dart
+│   └── widgets
+│       └── custom_button.dart
+├── pubspec.lock
+├── pubspec.yaml
+├── test
+│   └── widget_test.dart
+└── tree.txt
+
+71 directories, 89 files
