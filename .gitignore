@@ -1,0 +1,78 @@
+# ----------------------------------------------------------------------------
+# Flutter/Dart/Pub
+# ----------------------------------------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+# If you have multiple packages in one repo:
+**/build/
+**/doc/api/
+**/.packages
+**/.dart_tool/
+
+# ----------------------------------------------------------------------------
+# Android
+# ----------------------------------------------------------------------------
+**/android/**/generated/
+**/android/app/debug
+**/android/app/profile
+**/android/app/release
+*.jks
+*.keystore
+*.google-services.json
+# Local environment properties for Android
+android/local.properties
+
+# ----------------------------------------------------------------------------
+# iOS & macOS
+# ----------------------------------------------------------------------------
+*.moved-aside
+*.swp
+*.lock
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/App.framework
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/.last_build_id
+**/ios/.generated/
+**/ios/Pods/
+**/ios/ServiceDefinitions.json
+**/macos/Flutter/ephemeral/
+# Pods lock file usually stays, but Pods folder itself should be ignored
+Podfile.lock
+
+# ----------------------------------------------------------------------------
+# IDEs & Tools
+# ----------------------------------------------------------------------------
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+.history
+.project
+.settings/
+.classpath
+
+# ----------------------------------------------------------------------------
+# System Files (Mac/Linux/Windows)
+# ----------------------------------------------------------------------------
+.DS_Store
+Thumbs.db
+
+# ----------------------------------------------------------------------------
+# Secrets & Environment (Crucial for Security!)
+# ----------------------------------------------------------------------------
+.env
+.env.*
+# Ignore keys and credentials
+**/ios/Runner/GoogleService-Info.plist
+**/android/app/google-services.json
