@@ -2,8 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/presentation/widgets/kigali_map_painter.dart';
+import 'package:kgl_express/features/sender/presentation/widgets/logistic_draggable_panel.dart';
 
-import 'package:kgl_express/features/sender/presentation/logistic_draggable_panel.dart';
 // Simple Placeholder for your Map/Dashboard
 class PlaceholderHomeScreen extends StatefulWidget {
   const PlaceholderHomeScreen({super.key});
