@@ -5,10 +5,12 @@ import 'package:kgl_express/models/order_model.dart';
 class TrackButton extends StatelessWidget {
   final OrderModel order;
 
+  // Fixed Constructor: Removed BuildContext and positional 'order'
   const TrackButton({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
+    // context is already provided here by the build method
     final bool isLive = order.status == OrderStatus.inTransit;
 
     return SizedBox(
