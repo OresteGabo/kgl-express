@@ -11,7 +11,7 @@
 
 **KGL Express** is a high-performance, open-source logistics platform designed specifically for the urban environment of **Kigali, Rwanda**.
 <p align="center">
-  <img src="./screenshots/initial_home_page.png" width="600" alt="KGL Express Home Screen">
+  <img src="./screenshots/initial_home_page.png" width="300" alt="KGL Express Home Screen">
 </p>
 
 
