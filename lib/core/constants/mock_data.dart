@@ -9,7 +9,7 @@ final List<OrderModel> mockOrders = [
     pickupLocation: "Kacyiru Sector",
     destination: "KG 201 St, Remera",
     price: 2500,
-    status: OrderStatus.inTransit,
+    status: OrderStatus.delivered,
     recipientPhone: "+250 788 111 222",
     pickupNotes: "Call upon arrival, ask for the security desk.",
     items: [
@@ -37,7 +37,7 @@ final List<OrderModel> mockOrders = [
     pickupLocation: "Gisozi",
     destination: "Nyarutarama Rd, House 12",
     price: 4500,
-    status: OrderStatus.delivered,
+    status: OrderStatus.inTransit,
     recipientPhone: "+250 788 333 444",
     pickupNotes: "ID Card required. Handle with extreme care (Fragile).",
     items: [
@@ -65,7 +65,7 @@ final List<OrderModel> mockOrders = [
     pickupLocation: "Simba Supermarket",
     destination: "Kimihurura",
     price: 1200,
-    status: OrderStatus.pending,
+    status: OrderStatus.inTransit,
     recipientPhone: "+250 781 000 999",
     pickupNotes: "Ask for Order #99 at the pickup counter.",
     items: [
