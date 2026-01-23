@@ -32,7 +32,7 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
           Positioned.fill(
             child: ValueListenableBuilder<double>(
               valueListenable: panelScroll,
-              builder: (_, extent, __) {
+              builder: (_, extent, _) {
                 // We use (extent - 0.35) so the effect starts ONLY when
                 // the user pulls the sheet above its starting position.
                 double factor = (extent - 0.35).clamp(0.0, 1.0);
