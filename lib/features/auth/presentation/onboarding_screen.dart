@@ -13,7 +13,7 @@ class OnboardingRoleScreen extends StatelessWidget {
 
     if (context.mounted) {
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) =>  PlaceholderHomeScreen()),
+        MaterialPageRoute(builder: (_) =>  const PlaceholderHomeScreen()),
       );
     }
   }
