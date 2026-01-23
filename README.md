@@ -10,14 +10,27 @@
 ## 📍 Overview
 
 **KGL Express** is a high-performance, open-source logistics platform designed specifically for the urban environment of **Kigali, Rwanda**.
+
 <p align="center">
   <img src="./screenshots/initial_home_page.png" width="300" alt="KGL Express Home Screen">
 </p>
 
-
 Built with **Flutter** and **OpenStreetMap**, it provides a scalable, cost-effective delivery solution for **local sellers, moto-couriers, and customers** — without relying on expensive proprietary map APIs.
 
 Unlike traditional delivery apps, **KGL Express** features an intelligent dispatch system that understands **local logistics constraints**, ensuring safety through automated order splitting and vehicle matching (e.g. separating food from toxic goods).
+
+---
+
+## 🗺️ Live Tracking Preview
+
+<p align="center">
+  <img src="./screenshots/livetracking.png" width="300" alt="Live Tracking Screen">
+</p>
+
+🎥 **Short Demo Video (3s)**  
+▶️ [Watch live tracking demo](./screenshots/demo.webm)
+
+> GitHub does not embed `.webm` inline, but it provides a clickable preview.
 
 ---
 
@@ -33,7 +46,7 @@ Unlike traditional delivery apps, **KGL Express** features an intelligent dispat
   Optimized for moto-taxi logistics with offline fallbacks like direct phone calls.
 
 - **Multi-Role Ecosystem**  
-  Dedicated flows for **Sellers**, **Receivers**, and **Moto-Cyclists**.
+  Dedicated flows for **Senders**, **Receivers**, and **Moto-Cyclists**.
 
 - **Flexible Payments**  
   Choose between *Sender Pays* or *Receiver Pays* at delivery time.
@@ -45,42 +58,75 @@ Unlike traditional delivery apps, **KGL Express** features an intelligent dispat
 ### 📦 For Senders (Sellers)
 - Bulk item entry per order
 - Manual or automatic category selection
-- Intelligent dispatch logic for volume and compatibility
+- Intelligent order splitting based on safety rules
+- Price estimation before dispatch
 
-### 🛵 For Moto-Cyclists
-- Real-time GPS navigation with local map tiles
+### 🛵 For Moto-Cyclists (Drivers)
+- Real-time GPS navigation using OpenStreetMap
+- Live order requests & acceptance flow
 - Vehicle profiling (Standard moto, Box-moto, etc.)
-- Proximity-based order assignment
+- Continuous location updates during delivery
 
 ### 👤 For Receivers
 - Live delivery tracking across Kigali
-- Order review and confirmation before dispatch
+- Order confirmation before dispatch
 - Offline reliability via one-tap call to the rider
+- Delivery status notifications
+
+---
+
+## 🧠 System Architecture
+
+KGL Express follows a **feature-first, modular Flutter architecture**:
+
+- Clear separation of **UI**, **business logic**, and **services**
+- Feature isolation for better scalability
+- Shared core services (GPS, maps, themes)
+- Ready for backend integration (Firebase / Supabase)
 
 ---
 
 ## 🏗️ Tech Stack
 
 - **Frontend:** Flutter (Dart)
-- **Mapping:** `flutter_map` + OpenStreetMap
+- **Mapping:** OpenStreetMap (`flutter_map`)
 - **Geolocation:** `geolocator`, `latlong2`
 - **Backend:** Firebase (Auth, Firestore, FCM) *or* Supabase
 - **Routing:** OpenRouteService (ORS) API
+- **Platforms:** Android & iOS
 
 ---
 
 ## 📁 Project Structure
 
 ```text
-lib/
-├── core/        # Map services, GPS logic, app constants
-├── features/    # Role-based modules (Sender, Driver, Receiver)
-├── models/      # Order, package, and user data models
-├── logic/       # Smart order-splitting & dispatch algorithms
-└── widgets/     # Reusable UI components
+.
+├── android/                # Android native configuration
+├── ios/                    # iOS native configuration
+├── assets/                 # Images & icons
+│   ├── icons/
+│   └── images/
+├── lib/
+│   ├── core/               # Shared app-wide logic
+│   │   ├── constants/      # App constants
+│   │   ├── enums/          # Order status, user roles
+│   │   ├── services/       # GPS & map services
+│   │   └── theme/          # Global app theme
+│   │
+│   ├── features/           # Feature-based modules
+│   │   ├── auth/           # Authentication
+│   │   ├── sender/         # Order creation & packages
+│   │   ├── receiver/       # Delivery receiving flow
+│   │   └── driver/         # Live map & order requests
+│   │
+│   ├── models/             # Data models
+│   ├── widgets/            # Reusable UI components
+│   └── main.dart           # App entry point
+│
+├── screenshots/            # README media assets
+├── test/                   # Widget & unit tests
+└── README.md
 ```
-
----
 
 ## 🏁 Getting Started
 
