@@ -15,7 +15,7 @@ class LiveTrackingCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.15),
+            color: Colors.black.withValues(alpha:0.15),
             blurRadius: 10,
             offset: const Offset(0, 5),
           )
@@ -66,7 +66,7 @@ class _LocationInfo extends StatelessWidget {
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withOpacity(0.4),
+            color: Colors.white.withValues(alpha:0.4),
             fontSize: 9,
             fontWeight: FontWeight.bold,
             letterSpacing: 0.5,
@@ -104,7 +104,7 @@ class _AnimatedProgressLine extends StatelessWidget {
                 margin: const EdgeInsets.symmetric(horizontal: 2),
                 height: 1.5,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.15),
+                  color: Colors.white.withValues(alpha:0.15),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -130,7 +130,7 @@ class _AnimatedProgressLine extends StatelessWidget {
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.redAccent.withOpacity(0.6),
+                          color: Colors.redAccent.withValues(alpha:0.6),
                           blurRadius: 10,
                           spreadRadius: 3,
                         )
