@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/constants/mock_data.dart';
+import 'package:kgl_express/core/enums/order_status.dart';
 import 'package:kgl_express/features/sender/presentation/package_card.dart';
 import 'package:kgl_express/models/order_model.dart';
 
@@ -49,7 +50,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
                  itemBuilder: (context, index) {
                    // The first item (index 0) is your header and horizontal actions
                    if (index == 0) {
-                     return _buildHeaderSection();
+                     return _buildHeaderSection(context);
                    }
 
                    // Subsequent items are your dynamic orders
@@ -67,10 +68,14 @@ class LogisticsDraggablePanel extends StatelessWidget {
      );
    }
 
-   Widget _buildHeaderSection() {
+   Widget _buildHeaderSection(BuildContext context) {
+     // 1. Get ALL orders that are 'inTransit'
+     final activeOrders = mockOrders.where((o) => o.status == OrderStatus.inTransit).toList();
+
      return Column(
        crossAxisAlignment: CrossAxisAlignment.start,
        children: [
+         // --- Drag Handle ---
          Center(
            child: Container(
              width: 45,
@@ -82,6 +87,49 @@ class LogisticsDraggablePanel extends StatelessWidget {
            ),
          ),
          const SizedBox(height: 25),
+
+         // --- 2. Live Tracking Carousel (Conditional) ---
+         if (activeOrders.isNotEmpty) ...[
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+               const Text(
+                 "Live Tracking",
+                 style: TextStyle(
+                   fontSize: 14,
+                   fontWeight: FontWeight.bold,
+                   color: Colors.blueAccent,
+                   letterSpacing: 0.5,
+                 ),
+               ),
+               if (activeOrders.length > 1)
+                 Text(
+                   "Active: ${activeOrders.length}",
+                   style: TextStyle(color: Colors.grey[500], fontSize: 12, fontWeight: FontWeight.bold),
+                 ),
+             ],
+           ),
+           const SizedBox(height: 12),
+
+           // Carousel for multiple orders
+           SizedBox(
+             height: 145, // Adjusted height to fit content
+             child: PageView.builder(
+               itemCount: activeOrders.length,
+               controller: PageController(viewportFraction: 0.95), // Shows a peek of the next card
+               padEnds: false,
+               itemBuilder: (context, index) {
+                 return Padding(
+                   padding: const EdgeInsets.only(right: 12),
+                   child: _buildLiveTrackingCard(activeOrders[index]),
+                 );
+               },
+             ),
+           ),
+           const SizedBox(height: 30),
+         ],
+
+         // --- Quick Actions Header ---
          Row(
            mainAxisAlignment: MainAxisAlignment.spaceBetween,
            children: [
@@ -89,10 +137,15 @@ class LogisticsDraggablePanel extends StatelessWidget {
                "Quick Actions",
                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
              ),
-             TextButton(onPressed: () {}, child: const Text("View All")),
+             TextButton(
+               onPressed: () {},
+               child: const Text("View All", style: TextStyle(color: Colors.blue)),
+             ),
            ],
          ),
          const SizedBox(height: 15),
+
+         // --- Horizontal Scrollable Actions ---
          SizedBox(
            height: 115,
            child: ListView(
@@ -106,15 +159,110 @@ class LogisticsDraggablePanel extends StatelessWidget {
              ],
            ),
          ),
+
          const SizedBox(height: 35),
          const Text(
-           "Recent Deliveries",
+           "Recent Activity",
            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
          ),
          const SizedBox(height: 15),
        ],
      );
    }
+
+   Widget _buildLiveTrackingCard(OrderModel order) {
+     return Container(
+       padding: const EdgeInsets.all(20),
+       decoration: BoxDecoration(
+         color: Colors.black,
+         borderRadius: BorderRadius.circular(24),
+       ),
+       child: Column(
+         children: [
+           Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+               _locationInfo(order.pickupLocation, "PICKUP"),
+               Column(
+                 children: [
+                   const Icon(Icons.moped, color: Colors.white70, size: 18),
+                   Text(order.id.toUpperCase(),
+                       style: const TextStyle(color: Colors.white38, fontSize: 8)),
+                 ],
+               ),
+               _locationInfo(order.destination, "DESTINATION"),
+             ],
+           ),
+           const SizedBox(height: 20),
+
+           // --- Animated Progress Line (Dashed) ---
+           Stack(
+             children: [
+               Row(
+                 children: List.generate(
+                   15,
+                       (index) => Expanded(
+                     child: Container(
+                       margin: const EdgeInsets.symmetric(horizontal: 2),
+                       height: 2,
+                       decoration: BoxDecoration(
+                         color: Colors.white.withOpacity(0.1),
+                         borderRadius: BorderRadius.circular(2),
+                       ),
+                     ),
+                   ),
+                 ),
+               ),
+               TweenAnimationBuilder<double>(
+                 tween: Tween(begin: 0.0, end: 1.0),
+                 duration: const Duration(seconds: 4),
+                 builder: (context, value, child) {
+                   return FractionalTranslation(
+                     translation: Offset(value * 10, 0), // Adjust multiplier to match line length
+                     child: Container(
+                       width: 8,
+                       height: 8,
+                       decoration: BoxDecoration(
+                         color: Colors.redAccent,
+                         shape: BoxShape.circle,
+                         boxShadow: [
+                           BoxShadow(
+                             color: Colors.redAccent.withOpacity(0.6),
+                             blurRadius: 8,
+                             spreadRadius: 2,
+                           )
+                         ],
+                       ),
+                     ),
+                   );
+                 },
+               ),
+             ],
+           ),
+         ],
+       ),
+     );
+   }
+
+
+
+// Sub-helper for location text in the live card
+  Widget _locationInfo(String location, String label) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          location,
+          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+        ),
+      ],
+    );
+  }
   // Helper for the Action Cards
   Widget _buildActionCard(String title, IconData icon, Color color) {
     return Container(
@@ -147,104 +295,214 @@ class LogisticsDraggablePanel extends StatelessWidget {
   }
 }
 void _showPackageDetails(BuildContext context, OrderModel order) {
+  final bool isInTransit = order.status == OrderStatus.inTransit;
+
   showModalBottomSheet(
     context: context,
-    isScrollControlled: true, // Allows the sheet to expand for many items
-    backgroundColor: Colors.white,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-    ),
+    isScrollControlled: true,
+    backgroundColor: Colors.transparent, // Allow custom styling
     builder: (context) => DraggableScrollableSheet(
-      initialChildSize: 0.6, // Start at 60% of screen
-      minChildSize: 0.4,
-      maxChildSize: 0.9,
+      initialChildSize: 0.7,
+      minChildSize: 0.5,
+      maxChildSize: 0.95,
       expand: false,
-      builder: (context, scrollController) => SingleChildScrollView(
-        controller: scrollController,
-        padding: const EdgeInsets.all(24.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: 20),
+      builder: (context, scrollController) => Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: SingleChildScrollView(
+          controller: scrollController,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // --- DYNAMIC HEADER ---
+              if (isInTransit)
+                _buildLiveDetailsHeader(order)
+              else
+                _buildStandardDetailsHeader(order),
 
-            // Header
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text("Order Details", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(color: Colors.grey[100], borderRadius: BorderRadius.circular(6)),
-                  child: Text("#${order.id.toUpperCase()}", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 12)),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 20),
+                    // Logistics Info
+                    _detailRow(Icons.location_on_outlined, "From", order.pickupLocation),
+                    _detailRow(Icons.flag_outlined, "To", order.destination),
+                    _detailRow(Icons.person_pin_circle, "Recipient Info", "${order.recipientPhone}\n${order.pickupNotes}"),
+
+                    const SizedBox(height: 20),
+                    const Text("Items in Package", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 12),
+
+                    // Items List Container
+                    _buildItemsList(order),
+
+                    const Divider(height: 40),
+
+                    // Payment Summary
+                    _buildPaymentSummary(order),
+
+                    const SizedBox(height: 30),
+                    _buildTrackButton(context, order),
+                  ],
                 ),
-              ],
-            ),
-            const Divider(height: 40),
-
-            // Logistics Info
-            _detailRow(Icons.location_on_outlined, "From", order.pickupLocation),
-            _detailRow(Icons.flag_outlined, "To", order.destination),
-            _detailRow(Icons.person_pin_circle, "Recipient Info", "${order.recipientPhone}\n${order.pickupNotes}"),
-
-            const SizedBox(height: 20),
-            const Text("Items in Package", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-
-            // --- THE DYNAMIC ITEMS LIST ---
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.grey[50],
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[200]!),
               ),
-              child: Column(
-                children: order.items.map((item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0), // More breathing room
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start, // Align icon/quantity to top
-                    children: [
-                      Text(
-                          "${item.quantity}x",
-                          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.blue, fontSize: 14)
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                item.name,
-                                style: const TextStyle(fontWeight: FontWeight.w600, color: Colors.black87, fontSize: 14)
-                            ),
-                            if (item.description != null && item.description!.isNotEmpty)
-                              Padding(
-                                padding: const EdgeInsets.only(top: 2),
-                                child: Text(
-                                  item.description!,
-                                  style: TextStyle(color: Colors.grey[600], fontSize: 12, fontStyle: FontStyle.italic),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                )).toList(),
-              ),
-            ),
-
-            const Divider(height: 40),
-
-            // Payment Summary
-            _buildPaymentSummary(order),
-
-            const SizedBox(height: 30),
-            _buildTrackButton(context),
-          ],
+            ],
+          ),
         ),
       ),
+    ),
+  );
+}
+Widget _buildItemsList(OrderModel order) {
+  return Container(
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.grey[50], // Light background for contrast
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(color: Colors.grey[200]!),
+    ),
+    child: Column(
+      children: order.items.map((item) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Quantity Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.blue.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                "${item.quantity}x",
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blue,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Item Name & Description
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                      fontSize: 14,
+                    ),
+                  ),
+                  if (item.description != null && item.description!.isNotEmpty)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        item.description!,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      )).toList(),
+    ),
+  );
+}
+Widget _buildLiveDetailsHeader(OrderModel order) {
+  return Container(
+    padding: const EdgeInsets.fromLTRB(24, 12, 24, 30),
+    decoration: const BoxDecoration(
+      color: Colors.black,
+      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+    ),
+    child: Column(
+      children: [
+        // Handle bar for the modal
+        Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)))),
+        const SizedBox(height: 25),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text("LIVE TRACKING", style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
+                Text(order.title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(8)),
+              child: Text("#${order.id.toUpperCase()}", style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
+            )
+          ],
+        ),
+        const SizedBox(height: 30),
+
+        // The Animation
+        Stack(
+          alignment: Alignment.center,
+          children: [
+            Row(
+              children: List.generate(20, (i) => Expanded(
+                child: Container(margin: const EdgeInsets.symmetric(horizontal: 2), height: 1, color: Colors.white24),
+              )),
+            ),
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0.0, end: 1.0),
+              duration: const Duration(seconds: 3),
+              builder: (context, value, child) {
+                return FractionalTranslation(
+                  translation: Offset(value * 15 - 7.5, 0), // Travels back and forth
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: const BoxDecoration(
+                      color: Colors.redAccent,
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: Colors.redAccent, blurRadius: 15, spreadRadius: 4)],
+                    ),
+                  ),
+                );
+              },
+            ),
+            const Icon(Icons.moped, color: Colors.white, size: 24),
+          ],
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildStandardDetailsHeader(OrderModel order) {
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
+    child: Column(
+      children: [
+        Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
+        const SizedBox(height: 25),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(order.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text("#${order.id.toUpperCase()}", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 12)),
+          ],
+        ),
+      ],
     ),
   );
 }
@@ -299,18 +557,22 @@ Widget _buildPaymentSummary(OrderModel order) {
   );
 }
 
-Widget _buildTrackButton(BuildContext context) {
+Widget _buildTrackButton(BuildContext context, OrderModel order) {
+  final isLive = order.status == OrderStatus.inTransit;
+
   return SizedBox(
     width: double.infinity,
-    child: ElevatedButton(
+    child: ElevatedButton.icon(
       onPressed: () => Navigator.pop(context),
+      icon: Icon(isLive ? Icons.map : Icons.arrow_back, color: Colors.white),
+      label: Text(isLive ? "Open Live Map" : "Back to List",
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
+        backgroundColor: isLive ? Colors.blueAccent : Colors.black,
         padding: const EdgeInsets.symmetric(vertical: 18),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
         elevation: 0,
       ),
-      child: const Text("Track Live Delivery", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
     ),
   );
 }
