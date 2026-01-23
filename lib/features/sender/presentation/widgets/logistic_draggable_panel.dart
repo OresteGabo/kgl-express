@@ -1,8 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/constants/mock_data.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
+import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/package_card.dart';
+import 'package:kgl_express/features/sender/presentation/widgets/payment_summary.dart';
+import 'package:kgl_express/features/sender/presentation/widgets/track_button.dart';
 import 'package:kgl_express/models/order_model.dart';
+
+import 'items_list.dart';
+import 'live_tracking_card.dart';
+import 'order_details_sheet.dart';
 
 
 
@@ -121,7 +128,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
                itemBuilder: (context, index) {
                  return Padding(
                    padding: const EdgeInsets.only(right: 12),
-                   child: _buildLiveTrackingCard(activeOrders[index]),
+                   child: LiveTrackingCard(order:activeOrders[index]),
                  );
                },
              ),
@@ -170,99 +177,6 @@ class LogisticsDraggablePanel extends StatelessWidget {
      );
    }
 
-   Widget _buildLiveTrackingCard(OrderModel order) {
-     return Container(
-       padding: const EdgeInsets.all(20),
-       decoration: BoxDecoration(
-         color: Colors.black,
-         borderRadius: BorderRadius.circular(24),
-       ),
-       child: Column(
-         children: [
-           Row(
-             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-             children: [
-               _locationInfo(order.pickupLocation, "PICKUP"),
-               Column(
-                 children: [
-                   const Icon(Icons.moped, color: Colors.white70, size: 18),
-                   Text(order.id.toUpperCase(),
-                       style: const TextStyle(color: Colors.white38, fontSize: 8)),
-                 ],
-               ),
-               _locationInfo(order.destination, "DESTINATION"),
-             ],
-           ),
-           const SizedBox(height: 20),
-
-           // --- Animated Progress Line (Dashed) ---
-           Stack(
-             children: [
-               Row(
-                 children: List.generate(
-                   15,
-                       (index) => Expanded(
-                     child: Container(
-                       margin: const EdgeInsets.symmetric(horizontal: 2),
-                       height: 2,
-                       decoration: BoxDecoration(
-                         color: Colors.white.withValues(alpha:0.1),
-                         borderRadius: BorderRadius.circular(2),
-                       ),
-                     ),
-                   ),
-                 ),
-               ),
-               TweenAnimationBuilder<double>(
-                 tween: Tween(begin: 0.0, end: 1.0),
-                 duration: const Duration(seconds: 4),
-                 builder: (context, value, child) {
-                   return FractionalTranslation(
-                     translation: Offset(value * 10, 0), // Adjust multiplier to match line length
-                     child: Container(
-                       width: 8,
-                       height: 8,
-                       decoration: BoxDecoration(
-                         color: Colors.redAccent,
-                         shape: BoxShape.circle,
-                         boxShadow: [
-                           BoxShadow(
-                             color: Colors.redAccent.withValues(alpha:0.6),
-                             blurRadius: 8,
-                             spreadRadius: 2,
-                           )
-                         ],
-                       ),
-                     ),
-                   );
-                 },
-               ),
-             ],
-           ),
-         ],
-       ),
-     );
-   }
-
-
-
-// Sub-helper for location text in the live card
-  Widget _locationInfo(String location, String label) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(color: Colors.white.withValues(alpha:0.5), fontSize: 9, fontWeight: FontWeight.bold),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          location,
-          style: const TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
-        ),
-      ],
-    );
-  }
   // Helper for the Action Cards
   Widget _buildActionCard(String title, IconData icon, Color color) {
     return Container(
@@ -318,9 +232,9 @@ void _showPackageDetails(BuildContext context, OrderModel order) {
             children: [
               // --- DYNAMIC HEADER ---
               if (isInTransit)
-                _buildLiveDetailsHeader(order)
+                LiveDetailsHeader(order:order)
               else
-                _buildStandardDetailsHeader(order),
+                StandardDetailsHeader(order:order),
 
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 10),
@@ -329,24 +243,36 @@ void _showPackageDetails(BuildContext context, OrderModel order) {
                   children: [
                     const SizedBox(height: 20),
                     // Logistics Info
-                    _detailRow(Icons.location_on_outlined, "From", order.pickupLocation),
-                    _detailRow(Icons.flag_outlined, "To", order.destination),
-                    _detailRow(Icons.person_pin_circle, "Recipient Info", "${order.recipientPhone}\n${order.pickupNotes}"),
+                    DetailRow(
+                        icon: Icons.location_on_outlined,
+                        title: "From",
+                        value: order.pickupLocation
+                    ),
 
+                    DetailRow(
+                        icon: Icons.flag_outlined,
+                        title: "To",
+                        value: order.destination
+                    ),
+
+                    DetailRow(
+                        icon: Icons.person_pin_circle,
+                        title: "Recipient Info",
+                        value: "${order.recipientPhone}\n${order.pickupNotes}"
+                    ),
                     const SizedBox(height: 20),
-                    const Text("Items in Package", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 12),
+
 
                     // Items List Container
-                    _buildItemsList(order),
+                    ItemsList(order:order),
 
                     const Divider(height: 40),
 
                     // Payment Summary
-                    _buildPaymentSummary(order),
+                    PaymentSummary( order: order),
 
                     const SizedBox(height: 30),
-                    _buildTrackButton(context, order),
+                    TrackButton( order:order),
                   ],
                 ),
               ),
@@ -357,240 +283,5 @@ void _showPackageDetails(BuildContext context, OrderModel order) {
     ),
   );
 }
-Widget _buildItemsList(OrderModel order) {
-  return Container(
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
-      color: Colors.grey[50], // Light background for contrast
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Colors.grey[200]!),
-    ),
-    child: Column(
-      children: order.items.map((item) => Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8.0),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Quantity Badge
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha:0.1),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Text(
-                "${item.quantity}x",
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.blue,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            // Item Name & Description
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                      fontSize: 14,
-                    ),
-                  ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Text(
-                        item.description,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 12,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      )).toList(),
-    ),
-  );
-}
-Widget _buildLiveDetailsHeader(OrderModel order) {
-  return Container(
-    padding: const EdgeInsets.fromLTRB(24, 12, 24, 30),
-    decoration: const BoxDecoration(
-      color: Colors.black,
-      borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
-    ),
-    child: Column(
-      children: [
-        // Handle bar for the modal
-        Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)))),
-        const SizedBox(height: 25),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text("LIVE TRACKING", style: TextStyle(color: Colors.redAccent, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                Text(order.title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-              decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(8)),
-              child: Text("#${order.id.toUpperCase()}", style: const TextStyle(color: Colors.white70, fontSize: 12, fontWeight: FontWeight.bold)),
-            )
-          ],
-        ),
-        const SizedBox(height: 30),
 
-        // The Animation
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Row(
-              children: List.generate(20, (i) => Expanded(
-                child: Container(margin: const EdgeInsets.symmetric(horizontal: 2), height: 1, color: Colors.white24),
-              )),
-            ),
-            TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0.0, end: 1.0),
-              duration: const Duration(seconds: 3),
-              builder: (context, value, child) {
-                return FractionalTranslation(
-                  translation: Offset(value * 15 - 7.5, 0), // Travels back and forth
-                  child: Container(
-                    width: 12,
-                    height: 12,
-                    decoration: const BoxDecoration(
-                      color: Colors.redAccent,
-                      shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: Colors.redAccent, blurRadius: 15, spreadRadius: 4)],
-                    ),
-                  ),
-                );
-              },
-            ),
-            const Icon(Icons.moped, color: Colors.white, size: 24),
-          ],
-        ),
-      ],
-    ),
-  );
-}
 
-Widget _buildStandardDetailsHeader(OrderModel order) {
-  return Padding(
-    padding: const EdgeInsets.fromLTRB(24, 12, 24, 0),
-    child: Column(
-      children: [
-        Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey[300], borderRadius: BorderRadius.circular(2)))),
-        const SizedBox(height: 25),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(order.title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-            Text("#${order.id.toUpperCase()}", style: const TextStyle(color: Colors.black54, fontWeight: FontWeight.bold, fontSize: 12)),
-          ],
-        ),
-      ],
-    ),
-  );
-}
-Widget _buildPaymentSummary(OrderModel order) {
-  final method = order.paymentMethod;
-
-  return Row(
-    children: [
-      Container(
-        width: 40,
-        height: 40,
-        padding: const EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: method.assetPath != null
-            ? Image.asset(
-          method.assetPath!,
-          fit: BoxFit.contain,
-        )
-            : Icon(
-          method.icon,
-          color: Colors.blueGrey,
-          size: 20,
-        ),
-      ),
-      const SizedBox(width: 12),
-      Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            "Payment Method",
-            style: TextStyle(color: Colors.grey, fontSize: 11),
-          ),
-          Text(
-            method.label,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ],
-      ),
-      const Spacer(),
-      Text(
-        "${order.price.toInt()} RWF",
-        style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w900,
-          color: Colors.black,
-        ),
-      ),
-    ],
-  );
-}
-
-Widget _buildTrackButton(BuildContext context, OrderModel order) {
-  final isLive = order.status == OrderStatus.inTransit;
-
-  return SizedBox(
-    width: double.infinity,
-    child: ElevatedButton.icon(
-      onPressed: () => Navigator.pop(context),
-      icon: Icon(isLive ? Icons.map : Icons.arrow_back, color: Colors.white),
-      label: Text(isLive ? "Open Live Map" : "Back to List",
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: isLive ? Colors.blueAccent : Colors.black,
-        padding: const EdgeInsets.symmetric(vertical: 18),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-        elevation: 0,
-      ),
-    ),
-  );
-}
-
-Widget _detailRow(IconData icon, String title, String value) {
-  return Padding(
-    padding: const EdgeInsets.only(bottom: 16),
-    child: Row(
-      children: [
-        Icon(icon, color: Colors.grey[400], size: 20),
-        const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-          ],
-        ),
-      ],
-    ),
-  );
-}
