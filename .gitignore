@@ -1,5 +1,5 @@
 # ----------------------------------------------------------------------------
-# Flutter/Dart/Pub
+# Flutter / Dart
 # ----------------------------------------------------------------------------
 .dart_tool/
 .flutter-plugins
@@ -8,7 +8,6 @@
 .pub-cache/
 .pub/
 build/
-# If you have multiple packages in one repo:
 **/build/
 **/doc/api/
 **/.packages
@@ -23,34 +22,33 @@ build/
 **/android/app/release
 *.jks
 *.keystore
-*.google-services.json
-# Local environment properties for Android
 android/local.properties
 
 # ----------------------------------------------------------------------------
-# iOS & macOS
+# iOS & macOS (Refined)
 # ----------------------------------------------------------------------------
-*.moved-aside
-*.swp
-*.lock
-*.mode1v3
-*.mode2v3
-*.perspectivev3
+# Ignore user-specific workspace settings and temporary files
+**/ios/*.xcuserdatad/
+**/ios/**/WorkspaceSettings.xcsettings
+**/ios/**/IDEWorkspaceChecks.plist
+**/ios/**/xcshareddata/xcschemes/*.xcscheme
 **/ios/Flutter/Generated.xcconfig
 **/ios/Flutter/flutter_export_environment.sh
 **/ios/Flutter/App.framework
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Flutter.podspec
 **/ios/.last_build_id
-**/ios/.generated/
 **/ios/Pods/
-**/ios/ServiceDefinitions.json
 **/macos/Flutter/ephemeral/
-# Pods lock file usually stays, but Pods folder itself should be ignored
-Podfile.lock
+
+# DO NOT ignore these - Essential for building the app
+!**/ios/**/project.pbxproj
+!**/ios/**/Info.plist
+!**/ios/**/*.storyboard
+!**/ios/**/Runner.xcscheme
 
 # ----------------------------------------------------------------------------
-# IDEs & Tools
+# IDEs & OS Files
 # ----------------------------------------------------------------------------
 .idea/
 .vscode/
@@ -58,21 +56,16 @@ Podfile.lock
 *.iws
 *.ipr
 .history
-.project
-.settings/
-.classpath
-
-# ----------------------------------------------------------------------------
-# System Files (Mac/Linux/Windows)
-# ----------------------------------------------------------------------------
 .DS_Store
 Thumbs.db
+*.swp
+*.lock
 
 # ----------------------------------------------------------------------------
-# Secrets & Environment (Crucial for Security!)
+# Secrets & Environment (Security)
 # ----------------------------------------------------------------------------
 .env
 .env.*
-# Ignore keys and credentials
+# Ignore specific Firebase/Google config if you want to keep them private
 **/ios/Runner/GoogleService-Info.plist
 **/android/app/google-services.json
