@@ -27,7 +27,7 @@ class KGLExpressApp extends StatelessWidget {
       // If a role is saved, skip onboarding and go to "Home"
       home: initialRole == null
           ? const OnboardingRoleScreen()
-          :  PlaceholderHomeScreen(),
+          : const PlaceholderHomeScreen(),
     );
   }
 }
