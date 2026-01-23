@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/constants/mock_data.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
-import 'package:kgl_express/features/sender/presentation/package_card.dart';
+import 'package:kgl_express/features/sender/presentation/widgets/package_card.dart';
 import 'package:kgl_express/models/order_model.dart';
 
 
