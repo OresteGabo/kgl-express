@@ -27,7 +27,7 @@ Unlike traditional delivery apps, **KGL Express** features an intelligent dispat
   <img src="./screenshots/livetracking.png" width="300" alt="Live Tracking Screen">
 </p>
 
-🎥 **Short Demo Video (3s)**  
+🎥 **Short Demo Video (11s)**  
 ▶️ [Watch live tracking demo](./screenshots/demo.webm)
 
 > GitHub does not embed `.webm` inline, but it provides a clickable preview.
