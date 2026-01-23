@@ -206,7 +206,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
                        margin: const EdgeInsets.symmetric(horizontal: 2),
                        height: 2,
                        decoration: BoxDecoration(
-                         color: Colors.white.withOpacity(0.1),
+                         color: Colors.white.withValues(alpha:0.1),
                          borderRadius: BorderRadius.circular(2),
                        ),
                      ),
@@ -227,7 +227,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
                          shape: BoxShape.circle,
                          boxShadow: [
                            BoxShadow(
-                             color: Colors.redAccent.withOpacity(0.6),
+                             color: Colors.redAccent.withValues(alpha:0.6),
                              blurRadius: 8,
                              spreadRadius: 2,
                            )
@@ -253,7 +253,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(color: Colors.white.withOpacity(0.5), fontSize: 9, fontWeight: FontWeight.bold),
+          style: TextStyle(color: Colors.white.withValues(alpha:0.5), fontSize: 9, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 4),
         Text(
@@ -375,7 +375,7 @@ Widget _buildItemsList(OrderModel order) {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.1),
+                color: Colors.blue.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(6),
               ),
               child: Text(
@@ -401,11 +401,10 @@ Widget _buildItemsList(OrderModel order) {
                       fontSize: 14,
                     ),
                   ),
-                  if (item.description != null && item.description!.isNotEmpty)
                     Padding(
                       padding: const EdgeInsets.only(top: 2),
                       child: Text(
-                        item.description!,
+                        item.description,
                         style: TextStyle(
                           color: Colors.grey[600],
                           fontSize: 12,

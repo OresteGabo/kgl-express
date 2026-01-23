@@ -127,7 +127,7 @@ class LiveDetailsHeader extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
+                  color: Colors.white.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Text(
@@ -172,7 +172,7 @@ class LiveDetailsHeader extends StatelessWidget {
             child: Container(
               margin: const EdgeInsets.symmetric(horizontal: 1.5),
               height: 1.5,
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.white.withValues(alpha:0.1),
             ),
           )),
         ),
@@ -188,7 +188,7 @@ class LiveDetailsHeader extends StatelessWidget {
                 width: 14,
                 height: 14,
                 decoration: BoxDecoration(
-                  color: Colors.redAccent.withOpacity(0.3),
+                  color: Colors.redAccent.withValues(alpha:0.3),
                   shape: BoxShape.circle,
                   boxShadow: const [
                     BoxShadow(color: Colors.redAccent, blurRadius: 12, spreadRadius: 2)
