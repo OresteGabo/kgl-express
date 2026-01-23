@@ -15,9 +15,10 @@ class DetailRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 20), // Increased slightly for better breathability
+      padding: const EdgeInsets.only(bottom: 20),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start, // Align icon to the top for multi-line values
+        // Aligns icon to the top so it stays fixed even if 'value' wraps to 5 lines
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(8),
@@ -28,12 +29,15 @@ class DetailRow extends StatelessWidget {
             child: Icon(icon, color: Colors.grey[600], size: 20),
           ),
           const SizedBox(width: 16),
+
+          // REQUIRED: Expanded tells the Column to only take available width
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  title.toUpperCase(), // Making titles consistent
+                  title.toUpperCase(),
                   style: TextStyle(
                     color: Colors.grey[500],
                     fontSize: 10,
@@ -44,10 +48,15 @@ class DetailRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   value,
+                  // These three properties ensure NO OVERFLOW regardless of string length
+                  softWrap: true,
+                  overflow: TextOverflow.visible, // Text flows to next line
+                  textAlign: TextAlign.left,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 15,
+                    fontSize: 14,
                     color: Colors.black87,
+                    height: 1.3, // Adds breathing room between wrapped lines
                   ),
                 ),
               ],
