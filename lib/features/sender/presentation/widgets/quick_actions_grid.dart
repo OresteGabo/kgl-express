@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/widget_previews.dart';
+import 'package:kgl_express/features/sender/presentation/ServiceSelectionScreen.dart';
 import 'package:kgl_express/features/sender/presentation/create_order_screen.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/quick_action_card.dart';
+
+import '../../../map/presentation/pages/kigali_map_page.dart';
 
 
 class QuickActionsGrid extends StatelessWidget {
@@ -28,16 +32,29 @@ class QuickActionsGrid extends StatelessWidget {
               QuickActionCard(
                 title: "Send Item",
                 icon: Icons.local_shipping,
-                color: Colors.green,
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CreateOrderScreen())),
+                color: Colors.green[700]!, // Darker green for logistics
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CreateOrderScreen())
+                ),
               ),
               QuickActionCard(
-                title: "Track",
-                icon: Icons.location_on,
-                color: Colors.orange,
-                onTap: () {
-                  // Action pour le tracking (ex: ouvrir une map ou un historique actif)
-                },
+                title: "Order Service",
+                icon: Icons.design_services,
+                color: Colors.teal[600]!,
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ServiceSelectionScreen())
+                ),
+              ),
+              QuickActionCard(
+                title: "Track Order",
+                icon: Icons.near_me,
+                color: Colors.orange[800]!,
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const KigaliMapPage())
+                ),
               ),
               QuickActionCard(
                 title: "History",
@@ -62,3 +79,4 @@ class QuickActionsGrid extends StatelessWidget {
     );
   }
 }
+
