@@ -1,10 +1,12 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:intl/intl.dart';
 import 'package:kgl_express/core/presentation/widgets/kigali_map_painter.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/logistic_draggable_panel.dart';
 
-// Simple Placeholder for your Map/Dashboard
 class PlaceholderHomeScreen extends StatefulWidget {
   const PlaceholderHomeScreen({super.key});
 
@@ -13,12 +15,37 @@ class PlaceholderHomeScreen extends StatefulWidget {
 }
 
 class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
-  // Initializing with 0.35 because that is the initialChildSize of your panel
-  final ValueNotifier<double> panelScroll = ValueNotifier(0.35);
+  final ValueNotifier<double> panelScroll = ValueNotifier(0.45);
+
+  String location = "KIGALI | RW"; // fallback
+  late String formattedDate;
+
+  @override
+  void initState() {
+    super.initState();
+
+    final now = DateTime.now();
+    formattedDate = DateFormat('EEEE, dd MMM').format(now);
+
+    _loadLocation();
+  }
+
+  Future<void> _loadLocation() async {
+    try {
+      final result = await getCityAndCountry();
+      if (mounted) {
+        setState(() {
+          location = result.toUpperCase();
+        });
+      }
+    } catch (_) {
+      // keep fallback if error
+    }
+  }
 
   @override
   void dispose() {
-    panelScroll.dispose(); // Proper memory management
+    panelScroll.dispose();
     super.dispose();
   }
 
@@ -33,10 +60,7 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
             child: ValueListenableBuilder<double>(
               valueListenable: panelScroll,
               builder: (_, extent, _) {
-                // We use (extent - 0.35) so the effect starts ONLY when
-                // the user pulls the sheet above its starting position.
-                double factor = (extent - 0.35).clamp(0.0, 1.0);
-
+                double factor = (extent - 0.45).clamp(0.0, 1.0);
                 double parallaxOffset = factor * -150;
                 double scale = 1.0 + (factor * 0.4);
                 double blur = factor * 5;
@@ -47,8 +71,11 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
                     ..setTranslationRaw(0.0, parallaxOffset, 0.0),
                   child: ClipRect(
                     child: ImageFiltered(
-                      imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-                      child: CustomPaint(painter: KigaliMapPainter()),
+                      imageFilter:
+                      ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                      child: CustomPaint(
+                        painter: KigaliMapPainter(),
+                      ),
                     ),
                   ),
                 );
@@ -59,7 +86,8 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
           // 2. Top Bar
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -67,19 +95,30 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("KIGALI, RW",
-                          style: TextStyle(color: Colors.grey[600], fontSize: 10, letterSpacing: 2)),
-                      Text("Friday, 23 Jan",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                      Text(
+                        location,
+                        style: TextStyle(
+                          color: Colors.grey[600],
+                          fontSize: 10,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      Text(
+                        formattedDate,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
                     ],
                   ),
-                  // Votre bouton de notification Material existant...
+                  // Notification button here
                 ],
               ),
             ),
           ),
 
-          // 3. The Interactive Panel
+          // 3. Draggable Panel
           LogisticsDraggablePanel(
             scrollNotifier: panelScroll,
           ),
@@ -89,5 +128,27 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
   }
 }
 
+Future<String> getCityAndCountry() async {
+  LocationPermission permission = await Geolocator.checkPermission();
 
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+  }
 
+  if (permission == LocationPermission.denied ||
+      permission == LocationPermission.deniedForever) {
+    throw Exception("Location permission denied");
+  }
+
+  Position position = await Geolocator.getCurrentPosition(
+    desiredAccuracy: LocationAccuracy.low,
+  );
+
+  List<Placemark> placemarks = await placemarkFromCoordinates(
+    position.latitude,
+    position.longitude,
+  );
+
+  final place = placemarks.first;
+  return "${place.locality ?? 'Unknown'} | ${place.isoCountryCode ?? ''}";
+}
