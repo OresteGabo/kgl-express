@@ -1,0 +1,176 @@
+%! Author = muhirwagabooreste
+%! Date = 28/01/2026
+
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{titlesec}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{tcolorbox}
+\usepackage{hyperref}
+
+% --- Configuration ---
+\geometry{hmargin=2.5cm,vmargin=2.5cm}
+\definecolor{gabo_orange}{RGB}{255, 102, 0}
+\definecolor{light_grey}{RGB}{245, 245, 245}
+\definecolor{dark_grey}{RGB}{80, 80, 80}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=gabo_orange}
+
+\titleformat{\section}{\large\bfseries\color{gabo_orange}}{}{0em}{}[\titlerule]
+\titleformat{\subsection}{\normalsize\bfseries}{}{0em}{}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\textbf{GABO} | Order Connect Proposal}
+\rhead{Page \thepage}
+
+\begin{document}
+
+% --- COVER PAGE ---
+\begin{titlepage}
+    \centering
+    \vspace*{3cm}
+
+    {\Huge \color{gabo_orange}\textbf{ORDER CONNECT}}\\[0.2cm]
+    \color{dark_grey}
+    \rule{0.6\textwidth}{1pt}
+    \vspace{0.4cm}
+
+    {\Large \color{dark_grey}\textbf{The Unified Logistics Ecosystem for Rwanda}}\\[3cm]
+
+    \begin{tcolorbox}[colback=white, colframe=gabo_orange, arc=5pt, width=0.85\textwidth, boxsep=5mm]
+        \renewcommand{\arraystretch}{1.5}
+        \begin{tabular}{ll}
+            \textbf{Prepared for:} & Mutesi Vanessa \& Team\\
+            \textbf{Project Type:} & Comprehensive Logistics \& Service Platform\\
+            \textbf{Prepared by:} & GABO (A Goalkey Group Entity)\\
+            \textbf{Lead Consultant:} & Muhirwa Gabo Oreste\\
+            \textbf{Target Market:} & Rwanda (Kigali \& National Expansion)
+        \end{tabular}
+    \end{tcolorbox}
+
+    \vfill
+
+    \begin{minipage}{0.9\textwidth}
+        \centering
+        \color{red}\textbf{CONFIDENTIAL BUSINESS PROPOSAL}\\
+        \vspace{2mm}
+        \small \color{dark_grey} This document is confidential and intended solely for Mutesi Vanessa, her team, and potential investors. It must not be shared, distributed, or reproduced in any form without prior written permission from the author.
+    \end{minipage}
+
+    \vspace{1cm}
+    \today
+\end{titlepage}
+
+% --- PAGE 1: EXECUTIVE SUMMARY ---
+    \section{1. EXECUTIVE SUMMARY}
+    The Rwandan market is moving towards total digitalization, creating a massive need for reliable logistics. Currently, moving goods between individuals or from small businesses is fragmented and lacks trust. \textbf{Order Connect} is not an e-commerce store; it is a smart infrastructure designed to move anything—from personal items to professional technical services.
+
+    GABO proposes a unified ecosystem that prioritizes \textbf{Trust, Simplicity, and Speed}. We will deliver a high-performance solution compatible with both \textbf{iOS and Android} devices, ensuring that Order Connect is accessible to every user in Rwanda while maintaining a single, secure backend.
+
+% --- PAGE 2: FUNCTIONAL ECOSYSTEM ---
+    \section{2. THE TRIPLE-PORTAL SYSTEM}
+    Our solution consists of three specialized portals working in perfect synchrony:
+
+    \subsection{2.1 The Customer App (Sender \& Receiver)}
+    Designed for the general public and business owners.
+    \begin{itemize}
+        \item \textbf{Package Dispatch:} Users list items, specify details like fragility, and select vehicle types ranging from Motos to Trucks.
+        \item \textbf{Identity Discovery:} Use phone numbers as primary identifiers to find other users and initiate secure transfers.
+        \item \textbf{Service Requests:} Beyond logistics, users can request professional help, such as mechanics for car breakdowns or household technicians (plumbers, electricians, etc.).
+        \item \textbf{Flexible Rider Selection:} While the app automatically scans for available riders based on location, users also have the option to directly select a specific person they know and trust, especially if that person is already familiar with their location.
+    \end{itemize}
+
+    \subsection{2.2 The Rider App (The "Motar" Portal)}
+    Optimized for Rwanda's traditional moto-taxis and professional drivers.
+    \begin{itemize}
+        \item \textbf{Negotiation Engine:} Riders can view suggested prices based on distance. Both the user and the rider have the flexibility to negotiate the price before the mission is accepted.
+        \item \textbf{Live Navigation:} Integrated GPS and contact details (shared only after confirmation) allow the Motar to locate the pickup point precisely.
+    \end{itemize}
+
+    \subsection{2.3 The Admin Command Center}
+    A responsive web dashboard for management and oversight.
+    \begin{itemize}
+        \item \textbf{Operations Control:} Monitor active riders, delivery statuses, and overall platform health.
+        \item \textbf{Financial Oversight:} Track payment transits between buyers, sellers, and the company.
+    \end{itemize}
+
+% --- PAGE 3: PRACTICAL USAGE SCENARIOS ---
+    \section{3. PRACTICAL USAGE SCENARIOS}
+
+    Order Connect solves real-world Rwandan logistical challenges through flexible user flows:
+
+    \begin{tcolorbox}[colback=white,colframe=black,title=Scenario A: The Peer-to-Peer Social Exchange]
+        \textbf{Situation:} Jean-Paul left his laptop at a friend's house but is currently working in Kacyiru. \\
+        \textbf{Solution:} Jean-Paul enters his friend's phone number. The friend receives a notification to confirm they have the item. Once confirmed, the friend's GPS location and phone are shared with a Motar. The app suggests a price, but the Motar and Jean-Paul can negotiate until both agree on a fair rate.
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[colback=white,colframe=black,title=Scenario B: The Verified Social Seller]
+        \textbf{Situation:} Aline sells shoes on Instagram. A buyer is hesitant to pay before seeing the item. \\
+        \textbf{Solution:} Aline uses her "Verified Seller" profile. The buyer pays into the app. The Motar receives the shoes, and once the buyer provides a secure OTP upon delivery, funds are released. \textbf{Note:} The Motar is paid in all situations. The seller maintains a balance to ensure the Motar receives their fee even if the receiver rejects the package.
+    \end{tcolorbox}
+
+    \begin{tcolorbox}[colback=white,colframe=black,title=Scenario C: Technical Services]
+        \textbf{Situation:} A driver's car breaks down, or a resident needs an urgent plumber. \\
+        \textbf{Solution:} The user opens the "Services" tab. The app scans for nearby verified technicians. The technician accepts the request, navigates to the GPS coordinates, and provides the service through the Order Connect framework.
+    \end{tcolorbox}
+
+% --- PAGE 4: SECURITY \& COMMUNICATION ---
+    \section{4. SECURITY \& THE TRUST FRAMEWORK}
+    GABO builds security into every transaction to ensure peace of mind for both parties:
+
+    \subsection{4.1 Verified Profiles \& Accountability}
+    Individual transfers are flexible, but professional Sellers must undergo an ID verification process. This ensures accountability, allowing buyers to rely on the app's security when dealing with commercial entities.
+
+    \subsection{4.2 Secure Communication \& Chat}
+    To protect privacy, users can choose whether to share their phone numbers. For those who prefer privacy, the app provides a \textbf{Secure Internal Chat}. To optimize performance, chat history is kept for a limited number of days. However, professional Sellers are required to provide their phone numbers to maintain business transparency.
+
+    \subsection{4.3 The "Safe-Hand" Protocol}
+    To ensure successful handovers, receivers must provide a secure OTP code to the rider. Riders are also encouraged to take photo proof of the package during pickup and delivery to prevent condition disputes.
+
+% --- PAGE 5: FINANCIAL \& TECHNICAL STRATEGY ---
+    \section{5. FINANCIAL \& DEPLOYMENT STRATEGY}
+
+    \subsection{5.1 Payment Transit \& Integration}
+    Order Connect will leverage public APIs for \textbf{MTN MoMo and Airtel Money}.
+    \begin{itemize}
+        \item \textbf{Transaction Flow:} Payments from buyers transit through the company's accounts before being disbursed to sellers.
+        \item \textbf{Charge Optimization:} We will explore ways to bundle or optimize transactions to reduce mobile money charges, though this depends on the services provided by the telecom companies.
+        \item \textbf{Future Expansion:} The system is designed to integrate additional methods like BK Pay or RSwitch as their APIs become available.
+    \end{itemize}
+
+    \subsection{5.2 Platform Compatibility}
+    Our development strategy ensures that the application is fully optimized for \textbf{both iOS and Android}. This approach guarantees that the app remains reliable across a wide range of devices, even on lower-bandwidth networks (2G/3G) common in certain areas.
+
+    \section{6. CONCLUSION}
+    Order Connect is a project designed for the unique needs of the Rwandan market. GABO is ready to transform Vanessa's vision into a secure, intuitive, and profitable logistical tool that fosters trust between individuals and businesses alike.
+
+    \vspace{2cm}
+    \begin{flushright}
+        \textbf{Muhirwa Gabo Oreste} \\
+        Lead Consultant \& Founder, GABO \\
+        \textit{Goalkey Group} \\
+        \href{mailto:orestegabo@icloud.com}{orestegabo@icloud.com} \\
+        WhatsApp: +33 7 69 09 79 91
+    \end{flushright}
+
+    \vspace{1cm}
+    \hrule
+    \vspace{1cm}
+
+    \begin{center}
+    \begin{minipage}{0.8\textwidth}
+    \textbf{Addressed to:}\\
+    Mutesi Vanessa \& Team \\
+    WhatsApp: +250 781 603 306
+    \vspace{0.5cm}
+
+    \small\textit{Primary communication for this proposal is conducted via WhatsApp between the numbers listed above.}
+    \end{minipage}
+    \end{center}
+
+\end{document}
