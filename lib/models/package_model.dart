@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
 
+enum CompatibilityGroup {
+  safe,      // Food, Clothes, etc.
+  hazardous, // Chemicals, Acids
+  fragile    // Glass, Electronics
+}
+
 abstract class PackageItem {
   final String id;
   final String name;
@@ -16,8 +22,6 @@ abstract class PackageItem {
   IconData get icon;
   Color get categoryColor;
   bool get isHazardous;
-
-  // Use the Enum type here
   CompatibilityGroup get compatibilityGroup;
 }
 
@@ -47,8 +51,15 @@ class ToxicPackage extends PackageItem {
   CompatibilityGroup get compatibilityGroup => CompatibilityGroup.hazardous;
 }
 
-enum CompatibilityGroup {
-  safe,      // Food, Clothes, etc.
-  hazardous, // Chemicals, Acids
-  fragile    // Glass, Electronics (if you want them separated too)
+class FragilePackage extends PackageItem {
+  FragilePackage({required super.id, required super.name, super.quantity, super.weight});
+
+  @override
+  IconData get icon => Icons.hourglass_empty;
+  @override
+  Color get categoryColor => Colors.blueAccent;
+  @override
+  bool get isHazardous => false;
+  @override
+  CompatibilityGroup get compatibilityGroup => CompatibilityGroup.fragile;
 }
