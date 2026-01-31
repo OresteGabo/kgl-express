@@ -1,5 +1,11 @@
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:kgl_express/core/enums/ProviderType.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
 import 'package:kgl_express/core/enums/payment_method.dart';
+import 'package:kgl_express/features/sender/presentation/ProviderProfileScreen.dart';
+import 'package:kgl_express/features/sender/presentation/ServiceSelectionScreen.dart';
 import 'package:kgl_express/models/order_model.dart';
 
 final List<OrderModel> mockOrders = [
@@ -93,3 +99,164 @@ final List<OrderModel> mockOrders = [
     paymentMethod: PaymentMethod.airtel,
   ),
 ];
+
+// Mock database of registered users in Rwanda
+const Map<String, String> mockRegisteredUsers = {
+  "+250780000001": "Muhire Oreste",
+  "+250788123456": "Uwase Aline",
+  "+250791234567": "Gasana Jean Bosco",
+  "+250722000000": "Niyonsenga Eric",
+};
+
+
+// Data list for your categories
+final List<RwandaService> rwandaServices = [
+  RwandaService(name: "Mechanic", icon: Icons.settings, color: Colors.blue),
+  RwandaService(name: "Electrician", icon: Icons.bolt, color: Colors.orange),
+  RwandaService(name: "Plumber", icon: Icons.plumbing, color: Colors.cyan),
+  RwandaService(name: "House Cleaning", icon: Icons.cleaning_services, color: Colors.pink),
+  RwandaService(name: "Carpenter", icon: Icons.handyman, color: Colors.brown),
+  RwandaService(name: "Painter", icon: Icons.format_paint, color: Colors.purple),
+  RwandaService(name: "Masonry", icon: Icons.foundation, color: Colors.blueGrey),
+  RwandaService(name: "Welding", icon: Icons.precision_manufacturing, color: Colors.indigo),
+  RwandaService(name: "Tiling", icon: Icons.grid_view, color: Colors.amber[900]!),
+  RwandaService(name: "Landscaping", icon: Icons.landscape, color: Colors.green[800]!),
+];
+
+// Full List for the Listing Pages
+final List<ServiceProvider> allDummyProviders = [
+  ServiceProvider(
+    name: "Alice Umutoni",
+    specialty: "Expert Electrician",
+    location: "Nyamirambo, Kigali",
+    rating: 4.8,
+    jobsCompleted: 89,
+    phoneNumber: "+250781111111",
+    bio: "Certified technician for domestic wiring, solar panel installation, and smart home setup.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.airtel, PaymentMethod.spenn],
+  ),
+  ServiceProvider(
+    name: "Jean Paul",
+    specialty: "Master Mechanic",
+    location: "Kimironko, Kigali",
+    rating: 4.9,
+    jobsCompleted: 124,
+    phoneNumber: "+250780000000",
+    bio: "Over 10 years of experience in European and Japanese car brands. Specializing in engine diagnostics and suspension.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.bkPay, PaymentMethod.cash],
+  ),
+  ServiceProvider(
+    name: "Emmanuel K.",
+    specialty: "Professional Plumber",
+    location: "Kibagabaga, Kigali",
+    rating: 4.7,
+    jobsCompleted: 210,
+    phoneNumber: "+250782222222",
+    bio: "Emergency leak repairs and bathroom installations. Fast and reliable service across Kigali.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.cash],
+  ),
+  ServiceProvider(
+    name: "Grace M.",
+    specialty: "House Cleaning",
+    location: "Kacyiru, Kigali",
+    rating: 4.9,
+    jobsCompleted: 340,
+    phoneNumber: "+250783333333",
+    bio: "Deep cleaning services for homes and offices. I bring my own high-quality cleaning supplies.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.card],
+  ),
+  ServiceProvider(
+    name: "Fabrice N.",
+    specialty: "Carpenter",
+    location: "Gikondo, Kigali",
+    rating: 4.6,
+    jobsCompleted: 56,
+    phoneNumber: "+250784444444",
+    bio: "Custom furniture maker and cabinet installer. I specialize in modern Rwandan wood designs.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.bkPay, PaymentMethod.cash],
+  ),
+  ServiceProvider(
+    name: "Divine I.",
+    specialty: "Painter",
+    location: "Rebero, Kigali",
+    rating: 4.8,
+    jobsCompleted: 42,
+    phoneNumber: "+250785555555",
+    bio: "Interior and exterior painting. Expert in decorative finishes and wall textures.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.airtel],
+  ),
+  ServiceProvider(
+    name: "Safi L.",
+    specialty: "Laundry Specialist",
+    location: "Remera, Kigali",
+    rating: 4.7,
+    jobsCompleted: 156,
+    phoneNumber: "+250786666666",
+    bio: "Wash, dry, and iron services with home pickup and delivery available.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.cash],
+  ),
+  ServiceProvider(
+    name: "Patrick O.",
+    specialty: "AC Repair",
+    location: "Nyarutarama, Kigali",
+    rating: 4.5,
+    jobsCompleted: 78,
+    phoneNumber: "+250787777777",
+    bio: "Maintenance and repair for all split and central AC units. Certified HVAC technician.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.bkPay, PaymentMethod.card],
+  ),
+  ServiceProvider(
+    name: "Thierry H.",
+    specialty: "Master Mason",
+    location: "Masaka, Kigali",
+    rating: 4.8,
+    jobsCompleted: 450,
+    phoneNumber: "+250788000001",
+    bio: "Specialist in bricklaying, foundation work, and fence construction. I manage a team of 5 skilled workers for larger projects.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.bkPay, PaymentMethod.cash],
+  ),
+  ServiceProvider(
+    name: "Blaise W.",
+    specialty: "Professional Welder",
+    location: "Gatsata, Kigali",
+    rating: 4.7,
+    jobsCompleted: 132,
+    phoneNumber: "+250788000002",
+    bio: "Custom gate fabrication, window grills, and steel roof trusses. Quality welding with anti-rust finishing.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.airtel, PaymentMethod.cash],
+  ),
+  ServiceProvider(
+    name: "Solange U.",
+    specialty: "Tiling & Flooring",
+    location: "Busanza, Kigali",
+    rating: 4.9,
+    jobsCompleted: 75,
+    phoneNumber: "+250788000003",
+    bio: "Expert in ceramic, porcelain, and granite tile installation for bathrooms, kitchens, and living rooms.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.spenn, PaymentMethod.bkPay],
+  ),
+  ServiceProvider(
+    name: "Innocent Z.",
+    specialty: "Landscaping & Paving",
+    location: "Kigali Heights Area",
+    rating: 4.6,
+    jobsCompleted: 112,
+    phoneNumber: "+250788000004",
+    bio: "Compound design, grass planting, and cabro (paving block) installation. Making your home exterior beautiful.",
+    acceptedPayments: [PaymentMethod.momo, PaymentMethod.cash],
+  ),
+  ServiceProvider(
+    name: "KGL Builders Construction specializing Ltd",
+    specialty: "Masonry & Construction",
+    location: "Nyarutarama",
+    rating: 4.9,
+    jobsCompleted: 500,
+    phoneNumber: "+250780123456",
+    bio: "Full-service construction firm specializing in residential houses.",
+    acceptedPayments: [PaymentMethod.bkPay, PaymentMethod.card, PaymentMethod.momo],
+    type: ProviderType.company, // <--- Marked as Company
+  )
+];
+
+final randomElement = allDummyProviders[Random().nextInt(allDummyProviders.length)];
+final index = allDummyProviders.indexOf(randomElement);
