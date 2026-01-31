@@ -1,4 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:kgl_express/core/constants/mock_data.dart';
+import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
+import 'package:kgl_express/core/presentation/widgets/location_connector.dart';
+import 'package:kgl_express/core/services/contact_service.dart';
+import 'package:kgl_express/core/utils/string_utils.dart';
+import 'package:kgl_express/features/sender/presentation/widgets/package_item_tile.dart';
+import 'package:kgl_express/models/package_model.dart';
+import 'package:kgl_express/core/presentation/widgets/SectionHeader.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -10,162 +18,239 @@ class CreateOrderScreen extends StatefulWidget {
 class _CreateOrderScreenState extends State<CreateOrderScreen> {
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers pour récupérer les données
   final _pickupController = TextEditingController();
   final _destinationController = TextEditingController();
   final _recipientController = TextEditingController();
 
+  // Manage dynamic controllers for package names
+  final List<PackageItem> _items = [];
+  final List<TextEditingController> _itemControllers = [];
+
+  bool _isSavedInContacts = false;
+  final List<String> _myLocalContacts = ["+250788123456", "+250780000001"];
+
+  String _formattedPhone = "";
+  String _confirmedName = "";
+  bool _isVerifying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with one default item and its controller
+    _addNewItem();
+  }
+
+  @override
+  void dispose() {
+    _pickupController.dispose();
+    _destinationController.dispose();
+    _recipientController.dispose();
+    for (var controller in _itemControllers) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
+  void _handlePhoneInput(String value) {
+    String input = value.replaceAll(RegExp(r'\D'), '');
+    if (input.startsWith('07')) {
+      _formattedPhone = '+250${input.substring(1)}';
+    } else if (input.startsWith('7')) {
+      _formattedPhone = '+250$input';
+    } else if (input.startsWith('250')) {
+      _formattedPhone = '+$input';
+    } else {
+      _formattedPhone = input;
+    }
+
+    if (_formattedPhone.length == 13) {
+      setState(() {
+        _isVerifying = true;
+        _confirmedName = "";
+      });
+
+      Future.delayed(const Duration(milliseconds: 600), () {
+        if (!mounted) return;
+        setState(() {
+          final fullName = mockRegisteredUsers[_formattedPhone];
+          if (fullName != null) {
+            _isSavedInContacts = _myLocalContacts.contains(_formattedPhone);
+            _confirmedName = _isSavedInContacts ? fullName : obfuscateName(fullName);
+          } else {
+            _confirmedName = "New Recipient";
+          }
+          _isVerifying = false;
+        });
+      });
+    } else {
+      setState(() {
+        _confirmedName = "";
+        _isVerifying = false;
+      });
+    }
+  }
+
+  PackageItem _createItem(CompatibilityGroup group, String name, {int qty = 1}) {
+    final id = DateTime.now().millisecondsSinceEpoch.toString();
+    switch (group) {
+      case CompatibilityGroup.hazardous:
+        return ToxicPackage(id: id, name: name, quantity: qty);
+      case CompatibilityGroup.fragile:
+        return FragilePackage(id: id, name: name, quantity: qty);
+      case CompatibilityGroup.safe:
+      default:
+        return FoodPackage(id: id, name: name, quantity: qty);
+    }
+  }
+
+  void _addNewItem() {
+    setState(() {
+      _items.add(_createItem(CompatibilityGroup.safe, ""));
+      _itemControllers.add(TextEditingController());
+    });
+  }
+
+  void _removeItem(int index) {
+    if (_items.length > 1) {
+      setState(() {
+        _items.removeAt(index);
+        _itemControllers[index].dispose();
+        _itemControllers.removeAt(index);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final ui = AppUI.factory;
+
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: const Text("Send New Item",
-            style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new, color: Colors.black, size: 20),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Delivery Details",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                "Fill in the information to find a rider.",
-                style: TextStyle(color: Colors.grey[600]),
-              ),
-              const SizedBox(height: 32),
+      appBar: ui.buildAppBar(title: "Send New Item"),
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.all(24.0),
+          children: [
+            const SectionHeader(title: "Delivery Details"),
+            ui.buildInputField(controller: _pickupController, hint: "Pickup Location", icon: Icons.location_on),
+            const LocationConnector(),
+            ui.buildInputField(controller: _destinationController, hint: "Destination", icon: Icons.flag),
 
-              // --- Section Pick up ---
-              _buildLocationField(
-                label: "Pickup Location",
-                hint: "Where should the rider go?",
-                icon: Icons.location_on,
-                color: Colors.green,
-                controller: _pickupController,
-              ),
+            const SizedBox(height: 40),
+            const SectionHeader(title: "Package Items"),
 
-              const Padding(
-                padding: EdgeInsets.only(left: 37),
-                child: SizedBox(
-                  height: 30,
-                  child: VerticalDivider(thickness: 1, color: Colors.grey),
-                ),
-              ),
+            // Render dynamic items
+            ..._items.asMap().entries.map((e) {
+              final index = e.key;
+              final currentItem = e.value;
 
-              // --- Section Destination ---
-              _buildLocationField(
-                label: "Destination",
-                hint: "Where is the package going?",
-                icon: Icons.flag,
-                color: Colors.redAccent,
-                controller: _destinationController,
-              ),
+              return PackageItemTile(
+                index: index,
+                item: currentItem,
+                nameController: _itemControllers[index],
 
-              const SizedBox(height: 40),
+                // Fix for Final Name
+                onNameChanged: (newName) {
+                  _items[index] = _createItem(
+                    currentItem.compatibilityGroup,
+                    newName,
+                    qty: currentItem.quantity,
+                  );
+                },
 
-              // --- Recipient Info ---
-              const Text("Recipient Information",
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 16),
+                onRemove: (idx) => _removeItem(idx),
 
-              TextFormField(
-                controller: _recipientController,
-                decoration: _inputDecoration("Recipient Name & Phone", Icons.person_outline),
-                validator: (v) => v!.isEmpty ? "Required" : null,
-              ),
+                onGroupChanged: (group) {
+                  setState(() {
+                    _items[index] = _createItem(
+                      group,
+                      currentItem.name,
+                      qty: currentItem.quantity,
+                    );
+                  });
+                },
 
-              const SizedBox(height: 80), // Espace pour le bouton
-            ],
-          ),
+                // Fix for Final Quantity
+                onQtyChanged: (idx, newQty) {
+                  setState(() {
+                    _items[idx] = _createItem(
+                      currentItem.compatibilityGroup,
+                      currentItem.name,
+                      qty: newQty,
+                    );
+                  });
+                },
+              );
+            }).toList(),
+
+            ui.buildTextButton(
+                onPressed: _addNewItem,
+                label: "Add another item",
+                icon: Icons.add
+            ),
+
+            const SizedBox(height: 40),
+            const SectionHeader(title: "Recipient Information"),
+            ui.buildVerifiedInputField(
+              controller: _recipientController,
+              isVerifying: _isVerifying,
+              confirmedName: _confirmedName,
+              isSavedInContacts: _isSavedInContacts,
+              onChanged: _handlePhoneInput,
+              onPickContact: _onContactPickerPressed,
+            ),
+            const SizedBox(height: 100),
+          ],
         ),
       ),
       bottomNavigationBar: _buildConfirmButton(),
     );
   }
 
-  Widget _buildLocationField({
-    required String label,
-    required String hint,
-    required IconData icon,
-    required Color color,
-    required TextEditingController controller,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: color, size: 28),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey)),
-              TextFormField(
-                controller: controller,
-                style: const TextStyle(fontWeight: FontWeight.w600),
-                decoration: InputDecoration(
-                  hintText: hint,
-                  border: InputBorder.none,
-                  hintStyle: TextStyle(color: Colors.grey[400], fontWeight: FontWeight.normal),
-                ),
-                validator: (v) => v!.isEmpty ? "Please enter a location" : null,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  InputDecoration _inputDecoration(String label, IconData icon) {
-    return InputDecoration(
-      labelText: label,
-      prefixIcon: Icon(icon, size: 20),
-      filled: true,
-      fillColor: Colors.grey[50],
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(15),
-        borderSide: BorderSide.none,
-      ),
-    );
-  }
-
   Widget _buildConfirmButton() {
+    final ui = AppUI.factory;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.05), blurRadius: 10, offset: const Offset(0, -5))],
+        boxShadow: [
+          BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5)
+          )
+        ],
       ),
-      child: ElevatedButton(
+      child: ui.buildButton(
         onPressed: () {
-          if (_formKey.currentState!.validate()) {
-            // Logique de création ici
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Processing Order...")),
-            );
+          if (_formKey.currentState?.validate() ?? false) {
+            // Handle order logic
           }
         },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          minimumSize: const Size(double.infinity, 56),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        ),
-        child: const Text("Request Rider",
-            style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+        child: const Text("Request Rider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
     );
+  }
+
+  Future<void> _onContactPickerPressed() async {
+    // Call the service
+    final String? pickedNumber = await ContactService.pickContactNumber();
+
+    if (pickedNumber != null) {
+      setState(() {
+        // Update the controller (this makes the text appear in the field)
+        _recipientController.text = pickedNumber;
+
+        // Manually trigger your verification logic
+        _handlePhoneInput(pickedNumber);
+      });
+    } else {
+      // Optional: Show error only if they didn't just 'cancel' the picker
+      // This is where 'context' is valid because we are in the State class
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No contact selected or permission denied")),
+      );
+    }
   }
 }
