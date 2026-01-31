@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart';
@@ -13,9 +15,9 @@ void showOrderDetailsSheet(BuildContext context, OrderModel order) {
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) => DraggableScrollableSheet(
-      initialChildSize: 0.7,
-      minChildSize: 0.5,
-      maxChildSize: 0.95,
+      initialChildSize: 0.45,
+      minChildSize: 0.2,
+      maxChildSize: 0.9,
       expand: false,
       builder: (context, scrollController) => OrderDetailsContent(order: order, scrollController: scrollController),
     ),
@@ -62,154 +64,188 @@ class OrderDetailsContent extends StatelessWidget {
 
 class LiveDetailsHeader extends StatelessWidget {
   final OrderModel order;
-
   const LiveDetailsHeader({super.key, required this.order});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 12, 24, 40),
+      padding: const EdgeInsets.fromLTRB(24, 12, 24, 30),
       decoration: const BoxDecoration(
-        color: Colors.black,
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A1C1E), Color(0xFF0F1012)],
+        ),
         borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
       ),
       child: Column(
         children: [
-          // Modal Drag Handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 25),
-
-          // Header Info
+          _buildHandle(),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        _buildLivePulse(),
-                        const SizedBox(width: 8),
-                        const Text(
-                          "IN TRANSIT",
-                          style: TextStyle(
-                            color: Colors.redAccent,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      order.title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 22,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha:0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Text(
-                  "#${order.id.toUpperCase()}",
-                  style: const TextStyle(
-                    color: Colors.white70,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              )
+              _buildTitleSection(),
+              _buildActionButtons(),
             ],
           ),
           const SizedBox(height: 40),
-
-          // Live Animation Track
-          _buildTrackingAnimation(),
+          const _AnimatedProgressLine(), // The 3D Road
         ],
       ),
     );
   }
 
-  Widget _buildLivePulse() {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: const BoxDecoration(
-        color: Colors.redAccent,
-        shape: BoxShape.circle,
+  Widget _buildTitleSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text("IN TRANSIT", style: TextStyle(color: Colors.tealAccent, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.2)),
+        const SizedBox(height: 4),
+        Text(order.title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+
+  Widget _buildActionButtons() {
+    return Row(
+      children: [
+        _circleIconButton(Icons.message_rounded, () {}),
+        const SizedBox(width: 10),
+        _circleIconButton(Icons.call, () {}, isPrimary: true),
+      ],
+    );
+  }
+
+  Widget _circleIconButton(IconData icon, VoidCallback onTap, {bool isPrimary = false}) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: isPrimary ? Colors.tealAccent : Colors.white.withOpacity(0.05),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, size: 18, color: isPrimary ? Colors.black : Colors.white70),
       ),
     );
   }
 
-  Widget _buildTrackingAnimation() {
-    return Stack(
-      alignment: Alignment.center,
-      clipBehavior: Clip.none,
-      children: [
-        // The Track Line
-        Row(
-          children: List.generate(24, (i) => Expanded(
-            child: Container(
-              margin: const EdgeInsets.symmetric(horizontal: 1.5),
-              height: 1.5,
-              color: Colors.white.withValues(alpha:0.1),
-            ),
-          )),
-        ),
-        // The Pulse Dot
-        TweenAnimationBuilder<double>(
-          tween: Tween(begin: 0.0, end: 1.0),
-          duration: const Duration(seconds: 3),
-          builder: (context, value, child) {
-            // Using Sinusoidal movement to go back and forth
-            return FractionalTranslation(
-              translation: Offset((value * 12) - 6, 0),
-              child: Container(
-                width: 14,
-                height: 14,
-                decoration: BoxDecoration(
-                  color: Colors.redAccent.withValues(alpha:0.3),
-                  shape: BoxShape.circle,
-                  boxShadow: const [
-                    BoxShadow(color: Colors.redAccent, blurRadius: 12, spreadRadius: 2)
-                  ],
-                ),
-              ),
-            );
-          },
-        ),
-        // Stationary Central Icon
-        const CircleAvatar(
-          backgroundColor: Colors.black,
-          radius: 18,
-          child: Icon(Icons.moped, color: Colors.white, size: 22),
-        ),
-      ],
-    );
-  }
+  Widget _buildHandle() => Center(child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(2))));
 }
 
+class _AnimatedProgressLine extends StatefulWidget {
+  const _AnimatedProgressLine();
 
+  @override
+  State<_AnimatedProgressLine> createState() => _AnimatedProgressLineState();
+}
+
+class _AnimatedProgressLineState extends State<_AnimatedProgressLine>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  final List<String> _driverMessages = [
+    "I'm coming! 🏍️", "Gimme a minute", "Almost there! 🔥",
+    "Traffic is heavy.. 😅", "On my way! 🙌", "Approaching! 📍"
+  ];
+
+  String _currentMessage = "";
+  bool _showMessage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 4), vsync: this)..repeat(reverse: true);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+
+    _controller.addListener(() {
+      if (_controller.value > 0.48 && _controller.value < 0.52 && !_showMessage) {
+        _triggerRandomMessage();
+      }
+    });
+  }
+
+  void _triggerRandomMessage() async {
+    if (!mounted) return;
+    setState(() {
+      _currentMessage = _driverMessages[Random().nextInt(_driverMessages.length)];
+      _showMessage = true;
+    });
+    await Future.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() => _showMessage = false);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Transform(
+          transform: Matrix4.identity()..setEntry(3, 2, 0.0015)..rotateX(0.7),
+          alignment: Alignment.center,
+          child: Stack(
+            clipBehavior: Clip.none,
+            alignment: Alignment.centerLeft,
+            children: [
+              // Road
+              Container(
+                height: 35,
+                width: double.infinity,
+                decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(8)),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: List.generate(8, (i) => Container(width: 12, height: 2, color: Colors.white10)),
+                ),
+              ),
+              // Rider
+              LayoutBuilder(builder: (context, constraints) {
+                double xOffset = _animation.value * (constraints.maxWidth - 45);
+                return Transform.translate(
+                  offset: Offset(xOffset, -15),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      AnimatedOpacity(
+                        opacity: _showMessage ? 1.0 : 0.0,
+                        duration: const Duration(milliseconds: 400),
+                        child: _buildBubble(),
+                      ),
+                      const SizedBox(height: 4),
+                      _buildBikeIcon(_controller.status == AnimationStatus.reverse),
+                    ],
+                  ),
+                );
+              }),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBubble() => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)),
+    child: Text(_currentMessage, style: const TextStyle(color: Colors.black, fontSize: 9, fontWeight: FontWeight.bold)),
+  );
+
+  Widget _buildBikeIcon(bool flipped) => Transform.flip(
+    flipX: flipped,
+    child: Container(
+      padding: const EdgeInsets.all(5),
+      decoration: const BoxDecoration(color: Colors.tealAccent, shape: BoxShape.circle),
+      child: const Icon(Icons.moped_rounded, color: Colors.black, size: 16),
+    ),
+  );
+}
 class StandardDetailsHeader extends StatelessWidget {
   final OrderModel order;
 
