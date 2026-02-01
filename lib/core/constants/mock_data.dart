@@ -11,14 +11,14 @@ import 'package:kgl_express/models/order_model.dart';
 final List<Object> mockOrders = [
   // 1. A Bus Ticket (Inter-city)
   BusTicketModel(
-    activityId: "TKT-VOL-882",
-    from: "Nyabugogo (KGL)",
+    activityId: "TKT-882",
+    from: "Nyabugogo",
     to: "Huye Main Station",
     seat: "A12",
     operator: "Volcano Express",
     carPlate: 'RAC 456T',
     passengerName: 'ORESTE MUHIRWA GABO',
-    paymentMethod: PaymentMethod.bkPay,
+    paymentMethod: PaymentMethod.tapAndGo,
   ),
 
   // 2. An In-Transit Delivery
@@ -39,8 +39,8 @@ final List<Object> mockOrders = [
 
   // 3. Another Bus Ticket
   BusTicketModel(
-    activityId: "TKT-HOR-104",
-    from: "Nyabugogo (KGL)",
+    activityId: "TKT-104",
+    from: "Nyabugogo",
     to: "Musanze",
     seat: "B04",
     operator: "Horizon Express",
