@@ -32,7 +32,7 @@ class QuickActionsGrid extends StatelessWidget {
               QuickActionCard(
                 title: "Send Item",
                 icon: Icons.local_shipping,
-                color: Colors.green[700]!, // Darker green for logistics
+                color: Colors.green[700]!,
                 onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => const CreateOrderScreen())
@@ -47,31 +47,67 @@ class QuickActionsGrid extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const ServiceSelectionScreen())
                 ),
               ),
+              // NEW: Bus Tickets Action
               QuickActionCard(
-                title: "Track Order",
-                icon: Icons.near_me,
-                color: Colors.orange[800]!,
-                onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const KigaliMapPage())
-                ),
+                title: "Transport", // "Mobility" or "Travel" also work well
+                icon: Icons.explore_outlined, // Compass or Route icon feels more "super-app"
+                color: Colors.deepOrange[700]!,
+                onTap: () {
+                  /**
+                   * TODO: Implement Transport & Travel Hub
+                   * * UI STRUCTURE:
+                   * - Tab 1: "Kigali City" (Commute)
+                   * - Features: Tap&Go card balance, Route maps, City Bus schedules (KBS, Royal Express, RFTC).
+                   * - Real-time: Integration with 'Pickup Rwanda' style tracking if possible.
+                   * * - Tab 2: "Upcountry" (Inter-city)
+                   * - Focus: Long-distance booking (Volcano, Horizon, Ritco, Stella, etc.).
+                   * - Logic: Seat selection, Luggage space booking, Departure notifications.
+                   * * - Tab 3 (Future): "Rentals & Bikes"
+                   * - Car rentals (VW Move, Private agencies).
+                   * - Electric/Bicycle rentals (Guraride).
+                   * * SHARED LOGIC:
+                   * - Payment: MOMO/Airtel Money (Push USSD).
+                   * - Ticket: QR code generation for offline scanning.
+                   * */
+                },
               ),
               QuickActionCard(
-                title: "History",
-                icon: Icons.history,
-                color: Colors.blue,
+                title: "Real Estate",
+                isActivated: false, // Deactivated for now
+                icon: Icons.home_work, // Better icon for buildings + land
+                color: Colors.indigo[900]!, // Deep premium color for high-value assets
                 onTap: () {
-                  // Navigator.push(context, MaterialPageRoute(builder: (context) => const HistoryScreen()));
+                  /**
+                   *  TODO: Navigate to Real Estate Hub.
+                   * This screen should have a TabBar: [Rent, Buy, Sell]
+                   *
+                   *'Buy' section should include:
+                   * - Residential (Houses/Apartments)
+                   * - Commercial
+                   * - Plots/Land (Extremely popular in Rwanda)
+                   *
+                   * 'Sell' section:
+                   * - A "List my Property" button (Monetization: Charge for 'Premium' listings)
+                   * */
                 },
+              ),
+              QuickActionCard(
+                title: "History", // Combined name
+                icon: Icons.history,
+                color: Colors.blue[800]!,
+                onTap: () => Navigator.push(
+                    context,
+                    // we need to modify KigaliMapPage even its name Navigate to a screen with Tabs: [Active, Completed, Scheduled]
+                    MaterialPageRoute(builder: (context) => const KigaliMapPage())
+                ),
               ),
               QuickActionCard(
                 title: "Payments",
                 icon: Icons.account_balance_wallet,
                 color: Colors.purple,
-                onTap: () {
-                  // Action pour les paiements
-                },
+                onTap: () {},
               ),
+
             ],
           ),
         ),
