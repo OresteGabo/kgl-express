@@ -22,7 +22,12 @@ abstract class UIFactory {
     VoidCallback? onPickContact, // New parameter
   });
   // Navigation
-  PreferredSizeWidget buildAppBar({required String title, Widget? leading});
+  PreferredSizeWidget buildAppBar({
+    required String title,
+    Widget? leading,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  });
 
   // Interaction
   Widget buildButton({required Widget child, required VoidCallback onPressed});
@@ -59,5 +64,13 @@ abstract class UIFactory {
     required String name,
     required bool isSaved,
     required bool isIos,
+  });
+
+  Widget buildSelectionTile({
+    required String title,
+    required bool isSelected,
+    required IconData icon,
+    required Color iconColor,
+    required ValueChanged<bool?> onChanged,
   });
 }
