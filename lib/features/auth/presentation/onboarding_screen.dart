@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/enums/user_role.dart';
+import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
 import 'package:kgl_express/features/auth/presentation/widgets/role_card.dart';
 import 'package:kgl_express/features/sender/presentation/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,8 +21,13 @@ class OnboardingRoleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ui = AppUI.factory;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Setup KGL Express')),
+      appBar: ui.buildAppBar(
+        title: "", // Keep title empty for a cleaner onboarding look
+        backgroundColor: Colors.transparent,
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24.0),
         child: Column(
