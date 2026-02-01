@@ -1,18 +1,41 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:kgl_express/core/presentation/ui_factory/ui_factory.dart';
-import 'package:kgl_express/models/package_model.dart';
 
 class AndroidFactory implements UIFactory {
   @override
-  PreferredSizeWidget buildAppBar({required String title, Widget? leading}) {
+  PreferredSizeWidget buildAppBar({
+    required String title,
+    Widget? leading,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    // Determine if we are on a dark or light background to set the status bar icons
+    final bool isDarkBackground = (backgroundColor ?? Colors.white).computeLuminance() < 0.5;
+
     return AppBar(
-      title: Text(title, style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-      backgroundColor: Colors.white,
+      title: Text(
+          title,
+          style: TextStyle(
+              color: foregroundColor ?? (isDarkBackground ? Colors.white : Colors.black),
+              fontWeight: FontWeight.bold
+          )
+      ),
+      backgroundColor: backgroundColor ?? Colors.white,
       elevation: 0,
       centerTitle: false,
-      leading: leading, // Corrected signature
+      leading: leading,
+      // This ensures the back button matches the text color
+      iconTheme: IconThemeData(
+          color: foregroundColor ?? (isDarkBackground ? Colors.white : Colors.black)
+      ),
+      // This adapts the Status Bar (Time, Battery) to be visible
+      systemOverlayStyle: isDarkBackground
+          ? SystemUiOverlayStyle.light
+          : SystemUiOverlayStyle.dark,
     );
   }
+
 
   @override
   Widget buildButton({required Widget child, required VoidCallback onPressed}) {
@@ -214,5 +237,39 @@ class AndroidFactory implements UIFactory {
     );
   }
 
-  
+  @override
+  Widget buildSelectionTile({
+    required String title,
+    required bool isSelected,
+    required IconData icon,
+    required Color iconColor,
+    required ValueChanged<bool?> onChanged,
+  }) {
+    return SwitchListTile( // Note: Material 3 Switch is now the default in SwitchListTile
+      secondary: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: iconColor.withValues(alpha:0.1),
+          shape: BoxShape.circle,
+        ),
+        child: Icon(icon, color: iconColor),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+      ),
+      value: isSelected,
+      activeColor: Colors.green,
+      activeTrackColor: Colors.green.withValues(alpha:0.2),
+      // This is the magic part for the M3 check icon
+      thumbIcon: WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
+        if (states.contains(WidgetState.selected)) {
+          return const Icon(Icons.check, color: Colors.white);
+        }
+        return null; // When off, it remains a simple circle
+      }),
+      onChanged: onChanged,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+    );
+  }
 }
