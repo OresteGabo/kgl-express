@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+
 enum PaymentMethod {
   momo(
     label: 'MTN MoMo',
@@ -39,7 +40,7 @@ enum PaymentMethod {
   ),
   tapAndGo(
     label: 'Tap & Go',
-    assetPath: 'assets/icons/tap_go.png',
+    assetPath: 'assets/icons/tap_and_go.jpg',
     icon: Icons.contactless,
     isSecure: true,
   ),;
