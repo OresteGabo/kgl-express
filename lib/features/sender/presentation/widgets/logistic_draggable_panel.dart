@@ -435,7 +435,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
           Center(
             child: Column(
               children: [
-                const Icon(Icons.grid_view_rounded, size: 160, color: Colors.black),
+                const Icon(Icons.qr_code_2_outlined, size: 160, color: Colors.black),
                 const SizedBox(height: 12),
                 const Text(
                   "SCAN AT BOARDING",
