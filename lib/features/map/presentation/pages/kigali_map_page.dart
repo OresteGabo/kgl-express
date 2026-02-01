@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
 import '../../data/map_repository.dart';
 import '../../models/osm_models.dart';
 import '../widgets/kigali_map_painter.dart';
@@ -36,8 +37,14 @@ class _KigaliMapPageState extends State<KigaliMapPage> {
 
   @override
   Widget build(BuildContext context) {
+    final ui = AppUI.factory;
     return Scaffold(
-      appBar: AppBar(title: const Text("Kigali Custom Map")),
+      appBar: ui.buildAppBar(
+        title: "Kigali Custom Map",
+        // If your map is light-themed:
+        backgroundColor: Colors.white.withOpacity(0.8),
+        foregroundColor: Colors.black,
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : InteractiveViewer( // Standard Flutter widget for pan/zoom
