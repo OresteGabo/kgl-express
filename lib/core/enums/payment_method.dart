@@ -36,7 +36,13 @@ enum PaymentMethod {
     assetPath: null,
     icon: Icons.payments_outlined,
     isSecure: false, // User-to-User (Not protected by App)
-  );
+  ),
+  tapAndGo(
+    label: 'Tap & Go',
+    assetPath: 'assets/icons/tap_go.png',
+    icon: Icons.contactless,
+    isSecure: true,
+  ),;
 
   final String label;
   final String? assetPath;
