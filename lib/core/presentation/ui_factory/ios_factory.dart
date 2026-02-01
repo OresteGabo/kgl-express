@@ -4,11 +4,36 @@ import 'package:kgl_express/core/presentation/ui_factory/ui_factory.dart';
 
 class IosFactory implements UIFactory {
   @override
-  PreferredSizeWidget buildAppBar({required String title, Widget? leading}) {
-    return CupertinoNavigationBar(
-      middle: Text(title),
-      backgroundColor: Colors.white.withOpacity(0.9),
-      leading: leading, // Corrected signature
+  PreferredSizeWidget buildAppBar({
+    required String title,
+    Widget? leading,
+    Color? backgroundColor,
+    Color? foregroundColor,
+  }) {
+    final bool isDarkBackground = (backgroundColor ?? Colors.white).computeLuminance() < 0.5;
+    final Color finalForegroundColor = foregroundColor ?? (isDarkBackground ? Colors.white : Colors.black);
+
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(44), // Standard iOS Nav Bar height
+      child: CupertinoTheme(
+        data: CupertinoThemeData(
+          // This is where we force the back button and action colors
+          primaryColor: finalForegroundColor,
+        ),
+        child: CupertinoNavigationBar(
+          middle: Text(
+            title,
+            style: TextStyle(
+              color: finalForegroundColor,
+              fontWeight: FontWeight.w600,
+              letterSpacing: -0.5,
+            ),
+          ),
+          backgroundColor: backgroundColor ?? Colors.white.withOpacity(0.9),
+          leading: leading,
+          border: backgroundColor != null ? const Border(bottom: BorderSide(color: Colors.transparent)) : null,
+        ),
+      ),
     );
   }
 
@@ -195,6 +220,43 @@ class IosFactory implements UIFactory {
           ],
         ),
       ),
+    );
+  }
+
+  @override
+  Widget buildSelectionTile({
+    required String title,
+    required bool isSelected,
+    required IconData icon,
+    required Color iconColor,
+    required ValueChanged<bool?> onChanged,
+  }) {
+    return CupertinoListTile(
+      leading: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: iconColor.withValues(alpha:0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: iconColor, size: 22),
+      ),
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 16,
+          letterSpacing: -0.3,
+        ),
+      ),
+      // Using a Switch instead of a check icon
+      trailing: CupertinoSwitch(
+        value: isSelected,
+        activeTrackColor: CupertinoColors.activeGreen, // Classic iOS green
+        onChanged: (bool value) {
+          onChanged(value);
+        },
+      ),
+      // On iOS, tapping the row should also toggle the switch
+      onTap: () => onChanged(!isSelected),
     );
   }
 }
