@@ -127,15 +127,22 @@ class AndroidFactory implements UIFactory {
             const Spacer(),
             // Use a simple Radio here.
             // The RadioGroup should be wrapping ALL tiles in the Screen, not inside a single tile.
-            Radio<bool>(
-              value: true,
-              groupValue: isSelected,
-              onChanged: (_) => onTap(),
-              fillColor: WidgetStateProperty.resolveWith<Color>((states) {
-                if (states.contains(WidgetState.selected)) return Colors.black;
-                return Colors.grey;
-              }),
-            ),
+            // Inside your build method
+            RadioGroup<bool>(
+              groupValue: isSelected, // The current selected value
+              onChanged: (bool? value) {
+                if (value != null) {
+                  onTap(); // Call your existing function
+                }
+              },
+              child: Radio<bool>(
+                value: true, // The value this specific radio represents
+                fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                  if (states.contains(WidgetState.selected)) return Colors.black;
+                  return Colors.grey;
+                }),
+              ),
+            )
           ],
         ),
       ),
@@ -259,7 +266,7 @@ class AndroidFactory implements UIFactory {
         style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
       ),
       value: isSelected,
-      activeColor: Colors.green,
+      activeThumbColor: Colors.green,
       activeTrackColor: Colors.green.withValues(alpha:0.2),
       // This is the magic part for the M3 check icon
       thumbIcon: WidgetStateProperty.resolveWith<Icon?>((Set<WidgetState> states) {
