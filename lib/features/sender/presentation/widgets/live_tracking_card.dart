@@ -4,7 +4,7 @@ import 'dart:math';
 
 // Import your existing sheet function or define it locally if not accessible
 import 'package:kgl_express/features/sender/presentation/widgets/order_details_sheet.dart';
-
+/*
 class LiveTrackingCard extends StatelessWidget {
   final OrderModel order;
 
@@ -95,7 +95,8 @@ class LiveTrackingCard extends StatelessWidget {
     );
   }
 }
-
+*/
+/*
 class _LocationInfo extends StatelessWidget {
   final String location;
   final String label;
@@ -135,7 +136,7 @@ class _LocationInfo extends StatelessWidget {
     );
   }
 }
-
+*/
 
 class _AnimatedProgressLine extends StatefulWidget {
   const _AnimatedProgressLine();
@@ -312,6 +313,416 @@ class _AnimatedProgressLineState extends State<_AnimatedProgressLine>
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+}
+
+//import 'package:flutter/material.dart';
+
+
+
+// --- SHARED BASE DESIGN ---
+class _BaseLiveCard extends StatelessWidget {
+  final Widget child;
+  const _BaseLiveCard({required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A1C1E), Color(0xFF0F1012)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+      ),
+      child: child,
+    );
+  }
+}
+
+
+
+// Shared Sub-Widget
+class _LocationColumn extends StatelessWidget {
+  final String label, value;
+  final CrossAxisAlignment crossAxis;
+  const _LocationColumn({required this.label, required this.value, required this.crossAxis});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: crossAxis,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 4),
+          Text(value, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+}
+
+// Reuse your _AnimatedRoadIcon logic from the previous snippet here...
+
+/**
+ * NEW CODE USING A DESIGN PATTERN FACTORY:
+ * */
+
+// --- 1. THE MODELS (Mocking your models for the file) ---
+
+enum ActivityType { delivery, bus, rental }
+
+abstract class LiveActivityModel {
+  final String id;
+  final ActivityType type;
+  LiveActivityModel({required this.id, required this.type});
+}
+/*
+class OrderModel extends LiveActivityModel {
+  final String pickupLocation;
+  final String destination;
+  OrderModel({required super.id, required this.pickupLocation, required this.destination})
+      : super(type: ActivityType.delivery);
+}*/
+/*
+class BusTicketModel extends LiveActivityModel {
+  final String from;
+  final String to;
+  final String seatNumber;
+  final DateTime departureTime;
+  final String operatorName;
+
+  BusTicketModel({
+    required super.id,
+    required this.from,
+    required this.to,
+    required this.seatNumber,
+    required this.departureTime,
+    required this.operatorName,
+  }) : super(type: ActivityType.bus);
+}
+*/
+// --- 2. THE FACTORY ---
+
+class LiveActivityFactory {
+  static Widget createCard(Object activity, BuildContext context) {
+    if (activity is OrderModel) {
+      return DeliveryLiveCard(order: activity);
+    } else if (activity is BusTicketModel) {
+      return BusLiveCard(ticket: activity);
+    }
+    return const SizedBox.shrink();
+  }
+}
+
+// --- 3. THE BASE WRAPPER (Common Design) ---
+
+class BaseLiveCard extends StatelessWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const BaseLiveCard({super.key, required this.child, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Color(0xFF1A1C1E), Color(0xFF0F1012)],
+        ),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 15,
+            offset: const Offset(0, 8),
+          )
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(28),
+          splashColor: Colors.tealAccent.withValues(alpha: 0.05),
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: child,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// --- 4. CONCRETE IMPLEMENTATION: DELIVERY ---
+
+class DeliveryLiveCard extends StatelessWidget {
+  final OrderModel order;
+  const DeliveryLiveCard({super.key, required this.order});
+
+  @override
+  Widget build(BuildContext context) {
+    return _BaseLiveCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _LocationColumn(label: "PICKUP", value: order.pickupLocation, crossAxis: CrossAxisAlignment.start),
+              Icon(Icons.moped, color: Colors.tealAccent, size: 20),
+              _LocationColumn(label: "DESTINATION", value: order.destination, crossAxis: CrossAxisAlignment.end),
+            ],
+          ),
+          const SizedBox(height: 20),
+          ///TODO
+          _AnimatedRoadIcon(), // Your cool animation logic here
+        ],
+      ),
+    );
+  }
+}
+
+// --- 5. CONCRETE IMPLEMENTATION: BUS TICKET ---
+
+class BusLiveCard extends StatelessWidget {
+  final BusTicketModel ticket;
+  const BusLiveCard({super.key, required this.ticket});
+
+  @override
+  Widget build(BuildContext context) {
+    return _BaseLiveCard(
+      child: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _LocationColumn(label: "FROM", value: ticket.from, crossAxis: CrossAxisAlignment.start),
+              _LocationColumn(label: "OPERATOR", value: ticket.operator, crossAxis: CrossAxisAlignment.center),
+              _LocationColumn(label: "TO", value: ticket.to, crossAxis: CrossAxisAlignment.end),
+            ],
+          ),
+          const Divider(color: Colors.white10, height: 32),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              Text("Seat: ${ticket.seat}", style: TextStyle(color: Colors.tealAccent, fontWeight: FontWeight.bold)),
+              Text("Status: Boarding", style: TextStyle(color: Colors.orangeAccent)),
+            ],
+          )
+        ],
+      ),
+    );
+  }
+}
+
+// --- SHARED UI SUB-COMPONENTS ---
+
+class _LocationInfo extends StatelessWidget {
+  final String location, label;
+  final CrossAxisAlignment alignment;
+  const _LocationInfo({required this.location, required this.label, required this.alignment});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: alignment,
+        children: [
+          Text(label, style: const TextStyle(color: Colors.white38, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.2)),
+          const SizedBox(height: 6),
+          Text(location, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+        ],
+      ),
+    );
+  }
+}
+
+class _CenterIcon extends StatelessWidget {
+  final IconData icon;
+  final String id;
+  const _CenterIcon({required this.icon, required this.id});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.tealAccent, size: 22),
+        const SizedBox(height: 4),
+        Text(id.toUpperCase(), style: const TextStyle(color: Colors.white30, fontSize: 8, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+}
+
+class _InfoColumn extends StatelessWidget {
+  final String label, value;
+  final bool isHighlight;
+  final Color? color;
+  const _InfoColumn({required this.label, required this.value, this.isHighlight = false, this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(label, style: const TextStyle(color: Colors.white38, fontSize: 9, fontWeight: FontWeight.bold)),
+        const SizedBox(height: 4),
+        Text(value, style: TextStyle(color: color ?? (isHighlight ? Colors.tealAccent : Colors.white), fontSize: 16, fontWeight: FontWeight.bold)),
+      ],
+    );
+  }
+}
+
+// --- THE ANIMATED ROAD (REUSED FOR DELIVERY) ---
+
+class _AnimatedRoad extends StatefulWidget {
+  final IconData icon;
+  const _AnimatedRoad({required this.icon});
+
+  @override
+  State<_AnimatedRoad> createState() => _AnimatedRoadState();
+}
+
+class _AnimatedRoadState extends State<_AnimatedRoad> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(duration: const Duration(seconds: 3), vsync: this)..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() { _controller.dispose(); super.dispose(); }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Stack(
+          alignment: Alignment.centerLeft,
+          children: [
+            Container(height: 4, width: double.infinity, decoration: BoxDecoration(color: Colors.white10, borderRadius: BorderRadius.circular(2))),
+            Positioned(
+              left: _controller.value * (MediaQuery.of(context).size.width - 100),
+              child: Icon(widget.icon, color: Colors.tealAccent, size: 20),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _AnimatedRoadIcon extends StatefulWidget {
+  const _AnimatedRoadIcon();
+
+  @override
+  State<_AnimatedRoadIcon> createState() => _AnimatedRoadIconState();
+}
+
+class _AnimatedRoadIconState extends State<_AnimatedRoadIcon>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 4),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _animation = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _animation,
+      builder: (context, child) {
+        return Column(
+          children: [
+            Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                // The Road (Dashed Line)
+                Container(
+                  height: 2,
+                  width: double.infinity,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: List.generate(
+                      15,
+                          (index) => Container(
+                        width: 10,
+                        height: 2,
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                    ),
+                  ),
+                ),
+                // The Moving Bike
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    double maxWidth = constraints.maxWidth - 30;
+                    return Transform.translate(
+                      offset: Offset(_animation.value * maxWidth, -10),
+                      child: Transform.flip(
+                        flipX: _controller.status == AnimationStatus.reverse,
+                        child: Container(
+                          padding: const EdgeInsets.all(5),
+                          decoration: BoxDecoration(
+                            color: Colors.tealAccent,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.tealAccent.withValues(alpha: 0.4),
+                                blurRadius: 8,
+                                spreadRadius: 1,
+                              )
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.moped_rounded,
+                            color: Color(0xFF0F1012),
+                            size: 16,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              _controller.status == AnimationStatus.reverse
+                  ? "Returning to warehouse..."
+                  : "On the way to destination...",
+              style: const TextStyle(color: Colors.white24, fontSize: 10, fontStyle: FontStyle.italic),
+            )
+          ],
+        );
+      },
     );
   }
 }
