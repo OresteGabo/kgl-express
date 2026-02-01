@@ -243,218 +243,320 @@ class LogisticsDraggablePanel extends StatelessWidget {
     );
   }
 
+  // Refactored Ticket Details Section
   void _showTicketDetails(BuildContext context, BusTicketModel ticket) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.8,
-        decoration: const BoxDecoration(
-          color: Color(0xFFF8F9FA),
-          borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            // Drag Handle
-            Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(10)
-                )
-            ),
-
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.all(24),
-                child: Column(
+      builder: (context) {
+        // Use a Wrap or a ConstrainedBox to give Flutter a clear size target
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => Navigator.pop(context), // Close when tapping outside
+          child: DraggableScrollableSheet(
+            initialChildSize: 0.85,
+            minChildSize: 0.5,
+            maxChildSize: 0.95,
+            expand: false, // This is key
+            builder: (context, scrollController) {
+              return Container(
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF8F9FA),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
+                ),
+                child: Stack( // Using Stack to keep handle fixed at top
                   children: [
-                    // --- OPERATOR & LOGO SECTION ---
-                    Row(
+                    ListView( // Using ListView instead of SingleChildScrollView + Column
+                      controller: scrollController,
+                      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
                       children: [
-                        if (ticket.operatorLogo != null)
-                          Image.asset(ticket.operatorLogo!, width: 50, height: 50)
-                        else
-                          const CircleAvatar(
-                            radius: 25,
-                            backgroundColor: Colors.deepOrange,
-                            child: Icon(Icons.directions_bus, color: Colors.white, size: 28),
-                          ),
-                        const SizedBox(width: 16),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                                ticket.operator,
-                                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)
-                            ),
-                            Text(
-                                "Ticket ID: ${ticket.activityId}",
-                                style: TextStyle(color: Colors.grey[500], fontSize: 11)
-                            ),
-                          ],
-                        ),
+                        _buildTicketHeader(ticket),
+                        const SizedBox(height: 30),
+                        _buildRouteSection(ticket),
+                        const SizedBox(height: 30),
+                        _buildTicketMainBody(ticket),
+                        // Extra space for bottom notch
+                        SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
                       ],
                     ),
-
-                    const SizedBox(height: 30),
-
-                    // --- THE ROUTE SECTION (Now with code below) ---
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.center, // Vertically aligns text and icon
-                      children: [
-                        _TicketStation(
-                          city: ticket.from, // e.g. "Nyabugogo"
-                          label: "Origin",
-                        ),
-
-                        // The "Middle" Indicator
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.grey[100],
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(
-                                Icons.chevron_right_rounded,
-                                color: Colors.deepOrange,
-                                size: 24
-                            ),
-                          ),
-                        ),
-
-                        _TicketStation(
-                          city: ticket.to, // e.g. "Huye Main Station"
-                          label: "Destination",
-                          align: CrossAxisAlignment.end,
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 30),
-
-                    // --- TICKET BODY ---
-                    // Inside the _showTicketDetails function, replace the Container(child: Column(...)) with this:
-
-                    Container(
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(24),
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.04),
-                              blurRadius: 20,
-                              offset: const Offset(0, 10)
-                          )
-                        ],
-                      ),
-                      child: Column(
-                        children: [
-                          // --- LIVE OPERATOR STATUS ---
-                          Container(
-                            width: double.infinity,
-                            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
-                            decoration: BoxDecoration(
-                              color: Colors.green.withValues(alpha: 0.08),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(color: Colors.green.withValues(alpha: 0.1)),
-                            ),
-                            child: Row(
-                              children: [
-                                const Icon(Icons.info_outline, color: Colors.green, size: 16),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    "Operator: Bus has arrived at Nyabugogo. You can now board.",
-                                    style: TextStyle(
-                                        color: Colors.green[700],
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.bold
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-
-                          // --- PASSENGER & PLATE ---
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _InfoBlock(label: "PASSENGER", value: ticket.passengerName),
-                              const SizedBox(width: 20), // Spacer
-                              _InfoBlock(
-                                  label: "CAR PLATE",
-                                  value: ticket.carPlate,
-                                  isHighlight: true
-                              ),
-                            ],
-                          ),
-
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Divider(color: Color(0xFFF1F1F1), height: 1),
-                          ),
-
-                          // --- DATE & TIME ---
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _InfoBlock(label: "DEPARTURE DATE", value: "Feb 12, 2026"),
-                              _InfoBlock(label: "TIME", value: "09:30 AM"),
-                            ],
-                          ),
-
-                          const Padding(
-                            padding: EdgeInsets.symmetric(vertical: 20),
-                            child: Divider(color: Color(0xFFF1F1F1), height: 1),
-                          ),
-
-                          // --- PAYMENT ---
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              _InfoBlock(
-                                  label: "PAYMENT METHOD",
-                                  value: ticket.paymentMethod.label
-                              ),
-                              ticket.paymentMethod.assetPath != null
-                                  ? Image.asset(ticket.paymentMethod.assetPath!, width: 32)
-                                  : Icon(ticket.paymentMethod.icon, size: 28, color: Colors.blueGrey),
-                            ],
-                          ),
-                          const SizedBox(height: 40),
-
-                          // --- DATA MATRIX ---
-                          const Icon(Icons.grid_view_rounded, size: 180, color: Colors.black),
-                          const SizedBox(height: 12),
-                          const Text(
-                              "SCAN AT BOARDING",
-                              style: TextStyle(
-                                  fontWeight: FontWeight.w900,
-                                  letterSpacing: 1.5,
-                                  fontSize: 10,
-                                  color: Colors.grey
-                              )
-                          ),
-                        ],
-                      ),
+                    // Fixed Drag Handle
+                    Positioned(
+                      top: 12,
+                      left: 0,
+                      right: 0,
+                      child: Center(child: _buildDragHandle()),
                     ),
                   ],
                 ),
-              ),
-            ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+// 1. HELPER: Drag Handle
+  Widget _buildDragHandle() {
+    return Container(
+      width: 40,
+      height: 4,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        borderRadius: BorderRadius.circular(10),
+      ),
+    );
+  }
+
+// 2. HELPER: Operator & Logo
+  Widget _buildTicketHeader(BusTicketModel ticket) {
+    return Row(
+      children: [
+        if (ticket.operatorLogo != null)
+          Image.asset(ticket.operatorLogo!, width: 50, height: 50)
+        else
+          const CircleAvatar(
+            radius: 25,
+            backgroundColor: Colors.deepOrange,
+            child: Icon(Icons.directions_bus, color: Colors.white, size: 28),
+          ),
+        const SizedBox(width: 16),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(ticket.operator,
+                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
+            Text("Ticket ID: ${ticket.activityId}",
+                style: TextStyle(color: Colors.grey[500], fontSize: 11)),
           ],
         ),
+      ],
+    );
+  }
+
+// 3. HELPER: The Route Section (Now using Column to avoid overflow)
+  Widget _buildRouteSection(BusTicketModel ticket) {
+    return Row( // Use a Row to put the "Path" next to the "Names"
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        // THE VISUAL PATH (Left Side)
+        Column(
+          children: [
+            Icon(Icons.radio_button_unchecked, size: 16, color: Colors.grey[400]),
+            Container(
+              width: 2,
+              height: 40,
+              decoration: BoxDecoration(
+                color: Colors.grey[200],
+                // You can use a CustomPainter for a dashed line here
+              ),
+            ),
+            const Icon(Icons.location_on, size: 18, color: Colors.deepOrange),
+          ],
+        ),
+        const SizedBox(width: 20),
+        // THE STATION NAMES (Right Side)
+        Flexible( // Add this to prevent overflow if city names are very long
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _TicketStation(city: ticket.from, label: "Origin", align: CrossAxisAlignment.start),
+              const SizedBox(height: 12),
+              _TicketStation(city: ticket.to, label: "Destination", align: CrossAxisAlignment.start),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+
+
+// 4. HELPER: Main Ticket Card
+  Widget _buildTicketMainBody(BusTicketModel ticket) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          )
+        ],
       ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start, // Align labels to the left
+        children: [
+          _buildStatusBanner("Operator: Bus has arrived at Nyabugogo. You can now board."),
+          const SizedBox(height: 24),
+
+          // 1. PASSENGER (Full Width)
+          _InfoBlock(
+            label: "PASSENGER",
+            value: ticket.passengerName,
+            // You might want to update _InfoBlock to not use Flexible when it's full width
+          ),
+
+          const Divider(height: 32, color: Color(0xFFF1F1F1)),
+
+          // 2. CAR PLATE & PAYMENT (Grouped together)
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              _InfoBlock(
+                  label: "CAR PLATE",
+                  value: ticket.carPlate,
+                  isHighlight: true
+              ),
+              _buildPaymentChip(ticket),
+            ],
+          ),
+
+          const Divider(height: 32, color: Color(0xFFF1F1F1)),
+
+          // 3. DATE & TIME
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _InfoBlock(label: "DEPARTURE DATE", value: "Feb 12, 2026"),
+              _InfoBlock(label: "TIME", value: "09:30 AM"),
+            ],
+          ),
+
+          const SizedBox(height: 40),
+
+          // QR/Data Matrix Section
+          Center(
+            child: Column(
+              children: [
+                const Icon(Icons.grid_view_rounded, size: 160, color: Colors.black),
+                const SizedBox(height: 12),
+                const Text(
+                  "SCAN AT BOARDING",
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.5,
+                    fontSize: 10,
+                    color: Colors.grey,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+// Helper for the Success Payment Chip
+  Widget _buildPaymentChip(BusTicketModel ticket) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.end,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Text(
+          "PAYMENT STATUS",
+          style: TextStyle(
+            color: Colors.grey,
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.green.withValues(alpha: 0.08),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: Colors.green.withValues(alpha: 0.15)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // 1. PAYMENT LOGO OR ICON
+              if (ticket.paymentMethod.assetPath != null)
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Image.asset(
+                    ticket.paymentMethod.assetPath!,
+                    width: 16,
+                    height: 16,
+                    fit: BoxFit.contain,
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.only(right: 6.0),
+                  child: Icon(
+                    ticket.paymentMethod.icon ?? Icons.account_balance_wallet,
+                    color: Colors.green[700],
+                    size: 14,
+                  ),
+                ),
+
+              // 2. PAYMENT LABEL
+              Text(
+                ticket.paymentMethod.label.toUpperCase(),
+                style: TextStyle(
+                  color: Colors.green[800],
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+
+              const SizedBox(width: 8),
+
+              // 3. SUCCESS CHECKMARK
+              const Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 14,
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+// 5. SMALL HELPERS for reusable UI components
+  Widget _buildStatusBanner(String message) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      decoration: BoxDecoration(
+        color: Colors.green.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.green.withValues(alpha: 0.1)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.info_outline, color: Colors.green, size: 16),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(message,
+                style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentRow(BusTicketModel ticket) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _InfoBlock(label: "PAYMENT METHOD", value: ticket.paymentMethod.label),
+        ticket.paymentMethod.assetPath != null
+            ? Image.asset(ticket.paymentMethod.assetPath!, width: 32)
+            : Icon(ticket.paymentMethod.icon, size: 28, color: Colors.blueGrey),
+      ],
     );
   }
 
@@ -471,7 +573,6 @@ class _TicketStation extends StatelessWidget {
     this.align = CrossAxisAlignment.start,
   });
 
-  // Simple helper for Rwanda city codes
   String _getCityCode(String cityName) {
     final name = cityName.toUpperCase();
     if (name.contains("NYABUGOGO") || name.contains("KIGALI")) return "KGL";
@@ -483,58 +584,76 @@ class _TicketStation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Expanded( // Allows the column to take available space without overflow
-      child: Column(
-        crossAxisAlignment: align,
-        children: [
-          Text(
-            label.toUpperCase(),
-            style: const TextStyle(
-              color: Colors.grey,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.0,
-            ),
+    const textStyle = TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.w900,
+      color: Color(0xFF1A1C1E),
+    );
+
+    return Column(
+      crossAxisAlignment: align,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: const TextStyle(
+            color: Colors.grey,
+            fontSize: 10,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 1.0,
           ),
-          const SizedBox(height: 4),
-          // Animating Long City Names
-          SizedBox(
-            height: 28,
-            child: city.length > 12
-                ? Marquee(
-              text: city.toUpperCase(),
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF1A1C1E),
+        ),
+        const SizedBox(height: 4),
+
+        // --- SMART ANIMATION LOGIC ---
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final String upperCity = city.toUpperCase();
+
+            // Measure the width of the text
+            final textPainter = TextPainter(
+              text: TextSpan(text: upperCity, style: textStyle),
+              maxLines: 1,
+              textDirection: TextDirection.ltr,
+            )..layout();
+
+            // If text width > available width, use Marquee
+            if (textPainter.width > constraints.maxWidth) {
+              return SizedBox(
+                height: 28,
+                child: Marquee(
+                  text: upperCity,
+                  style: textStyle,
+                  scrollAxis: Axis.horizontal,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  blankSpace: 40.0, // Increased space for clarity
+                  velocity: 30.0,
+                  pauseAfterRound: const Duration(seconds: 2),
+                ),
+              );
+            }
+
+            // Otherwise, just show normal text
+            return SizedBox(
+              height: 28,
+              child: Text(
+                upperCity,
+                textAlign: align == CrossAxisAlignment.end ? TextAlign.right : TextAlign.left,
+                style: textStyle,
               ),
-              scrollAxis: Axis.horizontal,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              blankSpace: 20.0,
-              velocity: 30.0,
-              pauseAfterRound: const Duration(seconds: 2),
-            )
-                : Text(
-              city.toUpperCase(),
-              textAlign: align == CrossAxisAlignment.end ? TextAlign.right : TextAlign.left,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w900,
-                color: Color(0xFF1A1C1E),
-              ),
-            ),
+            );
+          },
+        ),
+
+        Text(
+          _getCityCode(city),
+          style: TextStyle(
+            color: Colors.grey[400],
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
           ),
-          // City Code (Small & Subtle)
-          Text(
-            _getCityCode(city),
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
@@ -551,45 +670,43 @@ class _InfoBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible( // Prevents this block from pushing the other out of bounds
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-              label,
-              style: const TextStyle(
-                  color: Colors.grey,
-                  fontSize: 9,
-                  fontWeight: FontWeight.bold
-              )
-          ),
-          const SizedBox(height: 4),
-          SizedBox(
-            height: 20,
-            child: value.length > 15
-                ? Marquee(
-              text: value.toUpperCase(),
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: isHighlight ? Colors.deepOrange : Colors.black,
-              ),
-              blankSpace: 20,
-              velocity: 30,
-              pauseAfterRound: const Duration(seconds: 2),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+            label,
+            style: const TextStyle(
+                color: Colors.grey,
+                fontSize: 9,
+                fontWeight: FontWeight.bold
             )
-                : Text(
-              value.toUpperCase(),
-              maxLines: 1,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w800,
-                color: isHighlight ? Colors.deepOrange : Colors.black,
-              ),
+        ),
+        const SizedBox(height: 4),
+        SizedBox(
+          height: 20,
+          child: value.length > 15
+              ? Marquee(
+            text: value.toUpperCase(),
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: isHighlight ? Colors.deepOrange : Colors.black,
+            ),
+            blankSpace: 20,
+            velocity: 30,
+            pauseAfterRound: const Duration(seconds: 2),
+          )
+              : Text(
+            value.toUpperCase(),
+            maxLines: 1,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              color: isHighlight ? Colors.deepOrange : Colors.black,
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
