@@ -17,7 +17,7 @@ class LiveTrackingCard extends StatelessWidget {
       child: InkWell( // 2. InkWell makes the whole card clickable
         onTap: () => showOrderDetailsSheet(context, order),
         borderRadius: BorderRadius.circular(28),
-        splashColor: Colors.tealAccent.withOpacity(0.1),
+        splashColor: Colors.tealAccent.withValues(alpha:0.1),
         highlightColor: Colors.transparent,
         child: Container(
           padding: const EdgeInsets.all(24),
@@ -33,7 +33,7 @@ class LiveTrackingCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.2),
+                color: Colors.black.withValues(alpha:0.2),
                 blurRadius: 15,
                 offset: const Offset(0, 8),
               )
@@ -223,13 +223,13 @@ class _AnimatedProgressLineState extends State<_AnimatedProgressLine>
                 height: 40,
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.04),
+                  color: Colors.white.withValues(alpha:0.04),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: List.generate(10, (index) => Container(
-                    width: 12, height: 2, color: Colors.white.withOpacity(0.1),
+                    width: 12, height: 2, color: Colors.white.withValues(alpha:0.1),
                   )),
                 ),
               ),
@@ -264,7 +264,7 @@ class _AnimatedProgressLineState extends State<_AnimatedProgressLine>
                           width: 16, height: 3,
                           margin: const EdgeInsets.only(top: 8),
                           decoration: BoxDecoration(
-                            boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.4), blurRadius: 4)],
+                            boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.4), blurRadius: 4)],
                           ),
                         ),
                       ],
@@ -287,7 +287,7 @@ class _AnimatedProgressLineState extends State<_AnimatedProgressLine>
         shape: BoxShape.circle,
         boxShadow: [
           BoxShadow(
-            color: Colors.tealAccent.withOpacity(0.4),
+            color: Colors.tealAccent.withValues(alpha:0.4),
             blurRadius: 12,
             spreadRadius: 2,
           )
@@ -301,7 +301,7 @@ class _AnimatedProgressLineState extends State<_AnimatedProgressLine>
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
+        color: Colors.white.withValues(alpha:0.95),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(
