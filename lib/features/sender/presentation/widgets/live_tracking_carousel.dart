@@ -26,7 +26,7 @@ class LiveTrackingCarousel extends StatelessWidget {
                 // This ensures cards are wide enough on both phone and tablet
                 width: MediaQuery.of(context).size.width * 0.9,
                 padding: const EdgeInsets.only(right: 12, bottom: 10),
-                child: LiveTrackingCard(order: order),
+                child: LiveActivityFactory.createCard(order, context),//LiveTrackingCard(order: order),
               );
             }).toList(),
           ),
