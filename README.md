@@ -1,77 +1,58 @@
 # KGL Express 🇷🇼
-> **Your City, Delivered — Safe, Smart, and Fast.**
+> **Your City, Delivered & Connected — Safe, Smart, and Fast.**
 
-[![Flutter](https://img.shields.io/badge/Framework-Flutter-02569B?logo=flutter)](https://flutter.dev)
+[![Framework](https://img.shields.io/badge/Framework-Flutter-02569B?logo=flutter)](https://flutter.dev)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Map](https://img.shields.io/badge/Map-OpenStreetMap-7EBC6F?logo=openstreetmap)](https://www.openstreetmap.org)
+[![Database](https://img.shields.io/badge/Database-SQLite-003B57?logo=sqlite)](https://sqlite.org)
 
+⚠️ This project is proprietary. No reuse or duplication is permitted without explicit written permission.
 ---
 
 ## 📍 Overview
 
-**KGL Express** is a high-performance, open-source logistics platform designed specifically for the urban environment of **Kigali, Rwanda**.
+**KGL Express** is a high-performance logistics and transport platform designed specifically for the urban environment of **Kigali, Rwanda**.
 
 <p align="center">
   <img src="./screenshots/initial_home_page.png" width="300" alt="KGL Express Home Screen">
 </p>
 
-Built with **Flutter** and **OpenStreetMap**, it provides a scalable, cost-effective delivery solution for **local sellers, moto-couriers, and customers** — without relying on expensive proprietary map APIs.
-
-Unlike traditional delivery apps, **KGL Express** features an intelligent dispatch system that understands **local logistics constraints**, ensuring safety through automated order splitting and vehicle matching (e.g. separating food from toxic goods).
-
----
-
-## 🗺️ Live Tracking Preview
-
-<p align="center">
-  <img src="./screenshots/livetracking.png" width="300" alt="Live Tracking Screen">
-</p>
-
-🎥 **Short Demo Video (11s)**  
-▶️ [Watch live tracking demo](./screenshots/demo.webm)
-
-> GitHub does not embed `.webm` inline, but it provides a clickable preview.
+Built with **Flutter** and **OpenStreetMap**, it provides a scalable delivery and transport solution for **local sellers, bus operators, moto-couriers, and customers** — without relying on expensive proprietary map APIs.
 
 ---
 
 ## 🚀 Why KGL Express?
 
 - **Zero API Costs**  
-  Uses OpenStreetMap and `flutter_map`, avoiding Google Maps fees and enabling unlimited scalability.
+  Uses OpenStreetMap and `flutter_map` with local SQLite tile caching (`kigali_map.db`), avoiding Google Maps fees.
 
 - **Smart Package Logic**  
-  Automatically categorizes and splits orders (Food, Clothes, Toxic Liquids) to ensure safety and hygiene.
+  Automatically categorizes and splits orders (Food, Clothes, Toxic Liquids) to ensure safety and hygiene during moto-dispatch.
+
+- **Inter-City Connectivity**  
+  Beyond parcels, it handles digital bus ticketing with live operator updates and car-plate tracking.
 
 - **Built for Kigali**  
-  Optimized for moto-taxi logistics with offline fallbacks like direct phone calls.
-
-- **Multi-Role Ecosystem**  
-  Dedicated flows for **Senders**, **Receivers**, and **Moto-Cyclists**.
-
-- **Flexible Payments**  
-  Choose between *Sender Pays* or *Receiver Pays* at delivery time.
+  Optimized for local constraints with offline fallbacks, Tap & Go integration, and MoMo/Airtel support.
 
 ---
 
 ## 🛠️ Key Features
 
-### 📦 For Senders (Sellers)
-- Bulk item entry per order
-- Manual or automatic category selection
-- Intelligent order splitting based on safety rules
-- Price estimation before dispatch
+### 📦 For Senders & Sellers
+- **Intelligent Order Splitting:** Automated safety rules for vehicle matching.
+- **Bulk Entry:** Easily add multiple items per delivery request.
+- **Service Selection:** Toggle between logistics providers and public transport operators.
 
-### 🛵 For Moto-Cyclists (Drivers)
-- Real-time GPS navigation using OpenStreetMap
-- Live order requests & acceptance flow
-- Vehicle profiling (Standard moto, Box-moto, etc.)
-- Continuous location updates during delivery
+### 🚌 For Passengers
+- **Digital Tickets:** Modern boarding passes with Data Matrix codes and marquee-animated long names.
+- **Live Boarding Status:** Real-time messages from bus operators (e.g., "Bus has arrived at Nyabugogo").
+- **Car Plate Tracking:** Quickly identify your bus in a crowded station via `RAC***` plate highlights.
 
-### 👤 For Receivers
-- Live delivery tracking across Kigali
-- Order confirmation before dispatch
-- Offline reliability via one-tap call to the rider
-- Delivery status notifications
+### 🛵 For Moto-Cyclists & Drivers
+- **Offline Maps:** Custom rendering using `osm_parser` and `kigali_map_painter`.
+- **Live Dispatch:** Real-time order requests and acceptance flow.
+- **GPS Reliability:** Continuous background location updates using `geolocator`.
 
 ---
 
@@ -79,21 +60,19 @@ Unlike traditional delivery apps, **KGL Express** features an intelligent dispat
 
 KGL Express follows a **feature-first, modular Flutter architecture**:
 
-- Clear separation of **UI**, **business logic**, and **services**
-- Feature isolation for better scalability
-- Shared core services (GPS, maps, themes)
-- Ready for backend integration (Firebase / Supabase)
+- **Platform UI Factory:** Custom `UIFactory` pattern for native-feeling Android and iOS components.
+- **Feature Isolation:** Auth, Map, Sender, and Driver flows are decoupled for independent scaling.
+- **Local Persistence:** SQLite storage for maps and activity history, ensuring reliability in low-data areas.
 
 ---
 
 ## 🏗️ Tech Stack
 
 - **Frontend:** Flutter (Dart)
-- **Mapping:** OpenStreetMap (`flutter_map`)
-- **Geolocation:** `geolocator`, `latlong2`
-- **Backend:** Firebase (Auth, Firestore, FCM) *or* Supabase
-- **Routing:** OpenRouteService (ORS) API
-- **Platforms:** Android & iOS
+- **Mapping:** OpenStreetMap (`flutter_map`), `latlong2`
+- **Database:** SQLite (`sqflite`) for map tiles (`.db`) and local storage
+- **Routing:** OpenRouteService (ORS) API / Offline OSM Parsing
+- **Payments:** MTN MoMo, Airtel Money, BK Pay, SPENN, Tap & Go
 
 ---
 
@@ -101,38 +80,34 @@ KGL Express follows a **feature-first, modular Flutter architecture**:
 
 ```text
 .
-├── android/                # Android native configuration
-├── ios/                    # iOS native configuration
-├── assets/                 # Images & icons
-│   ├── icons/
-│   └── images/
+├── assets/
+│   ├── icons/              # Payment logos (MoMo, BK, Tap&Go, etc.)
+│   ├── kigali_map.db       # Offline SQLite map tiles
+│   └── map1.osm            # Raw OpenStreetMap data
 ├── lib/
-│   ├── core/               # Shared app-wide logic
-│   │   ├── constants/      # App constants
-│   │   ├── enums/          # Order status, user roles
-│   │   ├── services/       # GPS & map services
-│   │   └── theme/          # Global app theme
-│   │
-│   ├── features/           # Feature-based modules
-│   │   ├── auth/           # Authentication
-│   │   ├── sender/         # Order creation & packages
-│   │   ├── receiver/       # Delivery receiving flow
-│   │   └── driver/         # Live map & order requests
-│   │
-│   ├── models/             # Data models
-│   ├── widgets/            # Reusable UI components
-│   └── main.dart           # App entry point
-│
-├── screenshots/            # README media assets
-├── test/                   # Widget & unit tests
-└── README.md
+│   ├── core/
+│   │   ├── enums/          # PaymentMethod, OrderStatus, ProviderType
+│   │   ├── presentation/   # UIFactory (Android/iOS) & PlatformUI
+│   │   ├── services/       # GPS, Map, and Contact Services
+│   │   └── theme/          # AppTheme (Deep Orange & Teal)
+│   ├── features/
+│   │   ├── auth/           # Onboarding & Role Selection
+│   │   ├── driver/         # Live Map & Order Requests
+│   │   ├── map/            # OSM Parser & Database Helper
+│   │   ├── receiver/       # Incoming delivery confirmation
+│   │   └── sender/         # Home, Draggable Activity Panel, & Ticket Sheets
+│   ├── models/             # OrderModel, PackageModel, BusTicketModel
+│   └── main.dart           # App Entry Point
+└── screenshots/            # README Media
 ```
+
+---
 
 ## 🏁 Getting Started
 
 ### Clone the repository
 ```bash
-git clone https://github.com/your-username/kgl_express.git
+git clone https://github.com/OresteGabo/kgl_express.git
 cd kgl_express
 ```
 
@@ -150,10 +125,12 @@ flutter run
 
 ## 🤝 Contributing
 
-Contributions are welcome!  
-If you’re familiar with **Flutter**, **logistics systems**, or **Kigali’s transport ecosystem**, feel free to open an issue or submit a pull request.
+Contributions are welcome!
+
+If you’re familiar with **Flutter**, **GIS/Mapping**, or **Kigali’s transport ecosystem**, feel free to open an issue or submit a pull request.
 
 ---
 
-### ❤️ Built for the community of Kigali
-Let’s keep the city moving.
+## ❤️ Built for the community of Kigali
+
+**Let’s keep the city moving.**
