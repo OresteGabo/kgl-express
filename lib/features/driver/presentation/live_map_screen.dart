@@ -108,7 +108,8 @@ class LiveMapScreen extends StatelessWidget {
                         ),
                         const SizedBox(height: 20),
                         Text(
-                          "Order #${displayOrder.id.substring(0, 8)}",
+                          /// TODO add the right order number
+                          "Order ####",//"Order #${displayOrder.id.substring(0, 8)}",
                           style: TextStyle(color: Colors.grey[500], fontWeight: FontWeight.bold),
                         ),
                         const Text(
