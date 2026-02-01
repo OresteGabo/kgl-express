@@ -14,8 +14,32 @@
 **KGL Express** is a high-performance logistics and transport platform designed specifically for the urban environment of **Kigali, Rwanda**.
 
 <p align="center">
-  <img src="./screenshots/initial_home_page.png" width="300" alt="KGL Express Home Screen">
+  <img src="screenshots/initial_home_page.png" width="30%" alt="Home Screen" />
+  <img src="screenshots/livetracking.png" width="30%" alt="Live Tracking" />
+  <img src="screenshots/bus_ticket.png" width="30%" alt="Bus Ticket" />
 </p>
+
+---
+
+## 📱 App Experience
+
+### 🔐 Onboarding & Profile
+Seamless entry into the ecosystem with specialized roles and personal data management.
+<p align="center">
+  <img src="screenshots/onboaring_select_role.png" width="45%" alt="Role Selection" />
+  <img src="screenshots/personal_profile.png" width="45%" alt="Profile" />
+</p>
+
+### 📦 Logistics & Service Selection
+Advanced service discovery and order creation with intelligent category splitting.
+<p align="center">
+  <img src="screenshots/order_services_screen.png" width="30%" alt="Services" />
+  <img src="screenshots/customise_service_grid.png" width="30%" alt="Grid Customization" />
+  <img src="screenshots/create_new_delivery.png" width="30%" alt="Create Delivery" />
+</p>
+
+### 🎥 Experience it in Action
+[**Watch the Demo Video**](screenshots/demo.webm)
 
 Built with **Flutter** and **OpenStreetMap**, it provides a scalable delivery and transport solution for **local sellers, bus operators, moto-couriers, and customers** — without relying on expensive proprietary map APIs.
 
