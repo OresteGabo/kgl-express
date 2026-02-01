@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kgl_express/core/enums/payment_method.dart';
 import 'package:kgl_express/core/utils/currency_formatter.dart';
 import 'package:marquee/marquee.dart';
-import 'package:kgl_express/core/enums/order_status.dart';
 import 'package:kgl_express/models/order_model.dart';
-// Assuming BusTicketModel is imported here
 
 class PackageCard extends StatelessWidget {
   final Object item; // Changed from OrderModel to Object
@@ -159,7 +157,7 @@ class PackageCard extends StatelessWidget {
   // Reuse your existing _buildPaymentDisplay logic...
   Widget _buildPaymentDisplay(PaymentMethod method) {
     if (method.assetPath != null) {
-      return Image.asset(method.assetPath!, width: 18, height: 18, errorBuilder: (_, __, ___) => Icon(method.icon, size: 18));
+      return Image.asset(method.assetPath!, width: 18, height: 18, errorBuilder: (_, _, _) => Icon(method.icon, size: 18));
     }
     return Icon(method.icon, size: 18, color: Colors.blueGrey);
   }

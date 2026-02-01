@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kgl_express/features/sender/presentation/ProviderProfileScreen.dart';
+import 'package:kgl_express/features/sender/presentation/provider_profile_screen.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:share_plus/share_plus.dart';
 

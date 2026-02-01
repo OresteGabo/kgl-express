@@ -29,7 +29,7 @@ class IosFactory implements UIFactory {
               letterSpacing: -0.5,
             ),
           ),
-          backgroundColor: backgroundColor ?? Colors.white.withOpacity(0.9),
+          backgroundColor: backgroundColor ?? Colors.white.withValues(alpha:0.9),
           leading: leading,
           border: backgroundColor != null ? const Border(bottom: BorderSide(color: Colors.transparent)) : null,
         ),
@@ -74,7 +74,7 @@ class IosFactory implements UIFactory {
     return BoxDecoration(
       color: CupertinoColors.systemBackground,
       borderRadius: BorderRadius.circular(12),
-      border: Border.all(color: CupertinoColors.separator.withOpacity(0.2)),
+      border: Border.all(color: CupertinoColors.separator.withValues(alpha:0.2)),
     );
   }
 

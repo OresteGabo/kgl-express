@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/constants/mock_data.dart';
-import 'package:kgl_express/features/sender/presentation/ProviderProfileScreen.dart';
-import 'package:kgl_express/features/sender/presentation/ServiceSelectionScreen.dart';
+import 'package:kgl_express/features/sender/presentation/provider_profile_screen.dart';
+import 'package:kgl_express/features/sender/presentation/service_selection_screen.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/provider_tile.dart..dart'; // Fixed the double ..dart in your import
 
 class ServiceProvidersListScreen extends StatefulWidget {

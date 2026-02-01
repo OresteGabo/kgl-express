@@ -9,7 +9,7 @@ class MapRepository {
       // Now this method exists and handles the SQLite logic!
       return await _dbHelper.queryWaysInBounds(minLat, maxLat, minLon, maxLon);
     } catch (e) {
-      print("Error fetching map data: $e");
+      //print("Error fetching map data: $e");
       return [];
     }
   }

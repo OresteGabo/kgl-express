@@ -6,7 +6,7 @@ import 'package:kgl_express/core/services/contact_service.dart';
 import 'package:kgl_express/core/utils/string_utils.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/package_item_tile.dart';
 import 'package:kgl_express/models/package_model.dart';
-import 'package:kgl_express/core/presentation/widgets/SectionHeader.dart';
+import 'package:kgl_express/core/presentation/widgets/section_header.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -98,8 +98,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       case CompatibilityGroup.fragile:
         return FragilePackage(id: id, name: name, quantity: qty);
       case CompatibilityGroup.safe:
-      default:
-        return FoodPackage(id: id, name: name, quantity: qty);
+      return FoodPackage(id: id, name: name, quantity: qty);
     }
   }
 
@@ -182,7 +181,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   });
                 },
               );
-            }).toList(),
+            }),
 
             ui.buildTextButton(
                 onPressed: _addNewItem,
@@ -234,22 +233,28 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   }
 
   Future<void> _onContactPickerPressed() async {
-    // Call the service
+    // 1. Call the async service
     final String? pickedNumber = await ContactService.pickContactNumber();
+
+    // 2. CHECK THE ASYNC GAP
+    // If the user navigated away while the picker was open, stop execution.
+    if (!mounted) return;
 
     if (pickedNumber != null) {
       setState(() {
-        // Update the controller (this makes the text appear in the field)
+        // Update the controller
         _recipientController.text = pickedNumber;
 
-        // Manually trigger your verification logic
+        // Trigger verification logic
         _handlePhoneInput(pickedNumber);
       });
     } else {
-      // Optional: Show error only if they didn't just 'cancel' the picker
-      // This is where 'context' is valid because we are in the State class
+      // 3. Safe to use context here because we checked 'mounted' above
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No contact selected or permission denied")),
+        const SnackBar(
+          content: Text("No contact selected or permission denied"),
+          behavior: SnackBarBehavior.floating, // Optional: looks better in modern UI
+        ),
       );
     }
   }

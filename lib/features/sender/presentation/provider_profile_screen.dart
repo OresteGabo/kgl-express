@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:kgl_express/core/enums/ProviderType.dart';
+import 'package:kgl_express/core/enums/provider_type.dart';
 import 'package:kgl_express/core/enums/payment_method.dart';
 import 'package:kgl_express/core/utils/contact_utils.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/provider_tile.dart..dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class ProviderProfileScreen extends StatelessWidget {
   final ServiceProvider provider;
@@ -275,7 +274,7 @@ class ProviderProfileScreen extends StatelessWidget {
           decoration: BoxDecoration(
             color: isCash ? Colors.grey[50] : Colors.white,
             border: Border.all(
-              color: isCash ? Colors.grey[300]! : Colors.teal.withOpacity(0.5),
+              color: isCash ? Colors.grey[300]! : Colors.teal.withValues(alpha:0.5),
               width: isCash ? 1 : 1.5,
             ),
             borderRadius: BorderRadius.circular(12),

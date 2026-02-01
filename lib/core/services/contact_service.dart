@@ -8,7 +8,7 @@ class ContactService {
     bool permission = await FlutterContacts.requestPermission();
 
     if (!permission) {
-      print("MY_DEBUG: Permission denied by user");
+      //print("MY_DEBUG: Permission denied by user");
       return null;
     }
 
@@ -21,7 +21,7 @@ class ContactService {
       }
     } catch (e) {
 
-      print("MY_DEBUG: Error picking contact: $e");
+      //print("MY_DEBUG: Error picking contact: $e");
     }
     return null;
   }

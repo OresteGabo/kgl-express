@@ -17,8 +17,8 @@ class _KigaliMapPageState extends State<KigaliMapPage> {
   bool _isLoading = true;
 
   // Map state (start centered on Kigali City Tower area)
-  double _zoom = 150000.0;
-  Offset _offset = Offset.zero;
+  final double _zoom = 150000.0;
+  final Offset _offset = Offset.zero;
 
   @override
   void initState() {
@@ -42,7 +42,7 @@ class _KigaliMapPageState extends State<KigaliMapPage> {
       appBar: ui.buildAppBar(
         title: "Kigali Custom Map",
         // If your map is light-themed:
-        backgroundColor: Colors.white.withOpacity(0.8),
+        backgroundColor: Colors.white.withValues(alpha:0.8),
         foregroundColor: Colors.black,
       ),
       body: _isLoading

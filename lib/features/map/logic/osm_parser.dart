@@ -1,7 +1,7 @@
 // 1. Add this import (use your project name if not using relative paths)
 import '../models/osm_models.dart';
 import 'package:flutter/foundation.dart';
-import 'package:xml/xml.dart';
+
 
 class OSMParser {
   // Now Dart recognizes OSMWay as a valid Type
@@ -10,7 +10,6 @@ class OSMParser {
   }
 
   static List<OSMWay> _parseBackground(String xml) {
-    final document = XmlDocument.parse(xml);
     List<OSMWay> ways = [];
 
     // Your parsing logic here...

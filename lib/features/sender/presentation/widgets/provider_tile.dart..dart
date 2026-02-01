@@ -1,8 +1,8 @@
 // provider_tile.dart
 import 'package:flutter/material.dart';
 import 'package:marquee/marquee.dart';
-import 'package:kgl_express/core/enums/ProviderType.dart';
-import '../ProviderProfileScreen.dart';
+import 'package:kgl_express/core/enums/provider_type.dart';
+import '../provider_profile_screen.dart';
 
 class ProviderTile extends StatelessWidget {
   final ServiceProvider pro;
@@ -41,7 +41,7 @@ class ProviderTile extends StatelessWidget {
             ? Image.network(
           pro.imageUrl!,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Icon(pro.type.icon, color: themeColor),
+          errorBuilder: (_, _, _) => Icon(pro.type.icon, color: themeColor),
           loadingBuilder: (context, child, progress) {
             if (progress == null) return child;
             return Center(child: CircularProgressIndicator(strokeWidth: 2, color: themeColor));

@@ -594,18 +594,3 @@ class _InfoBlock extends StatelessWidget {
   }
 }
 
-class _TicketInfo extends StatelessWidget {
-  final String label, value;
-  const _TicketInfo({required this.label, required this.value});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 4),
-        Text(value, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-      ],
-    );
-  }
-}

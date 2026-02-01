@@ -123,7 +123,7 @@ class LiveDetailsHeader extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          color: isPrimary ? Colors.tealAccent : Colors.white.withOpacity(0.05),
+          color: isPrimary ? Colors.tealAccent : Colors.white.withValues(alpha:0.05),
           shape: BoxShape.circle,
         ),
         child: Icon(icon, size: 18, color: isPrimary ? Colors.black : Colors.white70),

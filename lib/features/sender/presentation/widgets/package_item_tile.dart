@@ -169,8 +169,7 @@ class PackageItemTile extends StatelessWidget {
       case CompatibilityGroup.fragile:
         return Colors.blue[700]!;
       case CompatibilityGroup.safe:
-      default:
-        return Colors.green[700]!;
+      return Colors.green[700]!;
     }
   }
 }

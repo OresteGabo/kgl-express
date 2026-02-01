@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:kgl_express/core/presentation/widgets/kigali_map_painter.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart';
 import 'package:kgl_express/models/order_model.dart';
-import 'package:kgl_express/core/constants/mock_data.dart';
 
 class LiveMapScreen extends StatelessWidget {
   final OrderModel? order;
@@ -11,9 +10,6 @@ class LiveMapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Use the passed order or fallback to the first mock order
-    final displayOrder = order ?? mockOrders.first;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: Stack(

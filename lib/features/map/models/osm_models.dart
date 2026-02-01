@@ -58,7 +58,7 @@ class OSMWay {
       return const Color(0xFFC8F2BE); // Parks and Greenery
     }
 
-    return Colors.grey.withOpacity(0.3); // Default
+    return Colors.grey.withValues(alpha:0.3); // Default
   }
 
   /// Determines if the Way should be a 'Fill' (Building) or 'Stroke' (Road)

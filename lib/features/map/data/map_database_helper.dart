@@ -23,7 +23,7 @@ class MapDatabaseHelper {
 
     if (!exists) {
       // Should happen only the first time you launch your application
-      print("Creating new copy from asset");
+      //print("Creating new copy from asset");
 
       try {
         await Directory(dirname(path)).create(recursive: true);

@@ -1,10 +1,9 @@
-import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/constants/mock_data.dart';
 import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
-import 'package:kgl_express/features/sender/presentation/ProviderProfileScreen.dart';
-import 'package:kgl_express/features/sender/presentation/ServiceProvidersListScreen.dart';
+import 'package:kgl_express/features/sender/presentation/provider_profile_screen.dart';
+import 'package:kgl_express/features/sender/presentation/service_providers_list_screen.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/provider_tile.dart..dart';
 import 'package:flutter/widget_previews.dart';
 
@@ -312,9 +311,9 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
       borderRadius: BorderRadius.circular(15),
       child: Container(
         decoration: BoxDecoration(
-          color: service.color.withOpacity(0.1),
+          color: service.color.withValues(alpha:0.1),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: service.color.withOpacity(0.2), width: 1),
+          border: Border.all(color: service.color.withValues(alpha:0.2), width: 1),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

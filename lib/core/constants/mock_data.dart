@@ -1,11 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kgl_express/core/enums/ProviderType.dart';
+import 'package:kgl_express/core/enums/provider_type.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
 import 'package:kgl_express/core/enums/payment_method.dart';
-import 'package:kgl_express/features/sender/presentation/ProviderProfileScreen.dart';
-import 'package:kgl_express/features/sender/presentation/ServiceSelectionScreen.dart';
+import 'package:kgl_express/features/sender/presentation/provider_profile_screen.dart';
+import 'package:kgl_express/features/sender/presentation/service_selection_screen.dart';
 import 'package:kgl_express/models/order_model.dart';
 
 final List<Object> mockOrders = [
