@@ -8,7 +8,63 @@ import 'package:kgl_express/features/sender/presentation/ProviderProfileScreen.d
 import 'package:kgl_express/features/sender/presentation/ServiceSelectionScreen.dart';
 import 'package:kgl_express/models/order_model.dart';
 
-final List<OrderModel> mockOrders = [
+final List<Object> mockOrders = [
+  // 1. A Bus Ticket (Inter-city)
+  BusTicketModel(
+    activityId: "TKT-VOL-882",
+    from: "Nyabugogo (KGL)",
+    to: "Huye Main Station",
+    seat: "A12",
+    operator: "Volcano Express",
+    carPlate: 'RAC 456T',
+    passengerName: 'ORESTE MUHIRWA GABO',
+    paymentMethod: PaymentMethod.bkPay,
+  ),
+
+  // 2. An In-Transit Delivery
+  OrderModel(
+    id: "kgl002",
+    title: "Anniversary Gift",
+    pickupLocation: "Gisozi",
+    destination: "Nyarutarama Rd, House 12",
+    price: 4500,
+    status: OrderStatus.inTransit,
+    recipientPhone: "+250 788 333 444",
+    pickupNotes: "ID Card required. Handle with extreme care (Fragile).",
+    items: [
+      OrderItem(name: "Red Roses Bouquet", quantity: 1, description: "Fresh cut"),
+    ],
+    paymentMethod: PaymentMethod.cash,
+  ),
+
+  // 3. Another Bus Ticket
+  BusTicketModel(
+    activityId: "TKT-HOR-104",
+    from: "Nyabugogo (KGL)",
+    to: "Musanze",
+    seat: "B04",
+    operator: "Horizon Express",
+    carPlate: 'RAC 421B',
+    passengerName: 'NDAYISENGA JEAN FRANÇOIS REGIS',
+    paymentMethod: PaymentMethod.momo,
+  ),
+
+  // 4. A Grocery Order
+  OrderModel(
+    id: "kgl003",
+    title: "Grocery Restock",
+    pickupLocation: "Simba Supermarket",
+    destination: "Kimihurura",
+    price: 1200,
+    status: OrderStatus.inTransit,
+    recipientPhone: "+250 781 000 999",
+    pickupNotes: "Ask for Order #99.",
+    items: [
+      OrderItem(name: "Milk 1L", quantity: 4, description: "Inyange Full Cream"),
+    ],
+    paymentMethod: PaymentMethod.airtel,
+  ),
+
   OrderModel(
     id: "kgl001",
     title: "Electronics Delivery",
@@ -99,6 +155,15 @@ final List<OrderModel> mockOrders = [
     paymentMethod: PaymentMethod.airtel,
   ),
 ];
+List<OrderModel> getOrderModels(){
+  List<OrderModel> orderModels = [];
+  for (var element in mockOrders) {
+    if(element is OrderModel){
+      orderModels.add(element);
+    }
+  }
+  return orderModels;
+}
 
 // Mock database of registered users in Rwanda
 const Map<String, String> mockRegisteredUsers = {
@@ -107,6 +172,18 @@ const Map<String, String> mockRegisteredUsers = {
   "+250791234567": "Gasana Jean Bosco",
   "+250722000000": "Niyonsenga Eric",
 };
+
+final activeActivities = mockOrders.where((item) {
+  if (item is OrderModel) {
+    // Only show if it's actually moving
+    return item.status == OrderStatus.inTransit || item.status == OrderStatus.pending;
+  }
+  if (item is BusTicketModel) {
+    // Only show if the trip hasn't happened yet
+    return item.isActive;
+  }
+  return false;
+}).toList();
 
 
 // Data list for your categories
