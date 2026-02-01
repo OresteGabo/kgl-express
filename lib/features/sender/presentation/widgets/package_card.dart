@@ -12,7 +12,6 @@ class PackageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. Extract data based on type
     final data = _getDisplayData();
 
     return Card(
@@ -28,12 +27,12 @@ class PackageCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start, // Align icon to top
             children: [
               _buildStatusLeading(data),
               const SizedBox(width: 16),
+              // Details now takes the rest of the space including the price
               _buildOrderDetails(data),
-              const SizedBox(width: 12),
-              if (data.price != null) _buildPriceTrailing(data),
             ],
           ),
         ),
@@ -46,6 +45,7 @@ class PackageCard extends StatelessWidget {
     if (item is OrderModel) {
       final o = item as OrderModel;
       return _CardDisplayData(
+        id: o.id,
         title: o.title,
         subtitle: "To: ${o.destination}",
         icon: o.status.icon,
@@ -57,7 +57,8 @@ class PackageCard extends StatelessWidget {
     } else if (item is BusTicketModel) {
       final b = item as BusTicketModel;
       return _CardDisplayData(
-        title: "${b.operator} - Seat ${b.seat}",
+        id: b.activityId,
+        title: b.operator, //"this is my operator, ahwe and whe -n it is tooo long ot creatd a ",//,
         subtitle: "${b.from} ➔ ${b.to}",
         icon: Icons.directions_bus,
         accentColor: Colors.deepOrange,
@@ -67,7 +68,9 @@ class PackageCard extends StatelessWidget {
       );
     }
     // Fallback for unknown types
-    return _CardDisplayData(title: "Unknown", subtitle: "", icon: Icons.help, accentColor: Colors.grey, statusLabel: "");
+    return _CardDisplayData(
+      id:"#",
+        title: "Unknown", subtitle: "", icon: Icons.help, accentColor: Colors.grey, statusLabel: "");
   }
 
   // --- Sub-Widgets adapted to use _CardDisplayData ---
@@ -83,33 +86,134 @@ class PackageCard extends StatelessWidget {
     );
   }
 
+  /// TODO When title is too long, the design crash
   Widget _buildOrderDetails(_CardDisplayData data) {
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildMarqueeOrText(data.title, const TextStyle(fontWeight: FontWeight.bold, fontSize: 15), 20),
-          const SizedBox(height: 4),
-          _buildMarqueeOrText(data.subtitle, TextStyle(color: Colors.grey[600], fontSize: 12), 25),
-          const SizedBox(height: 8),
-          _buildStatusBadge(data),
+          // ROW 1: Title and ID
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: _buildMarqueeOrText(
+                  data.title,
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                data.id.toUpperCase(),
+                style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 14,
+                    color: Colors.grey[400]
+                ),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 6),
+
+          // ROW 2: Subtitle and Price Card
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildMarqueeOrText(
+                      data.subtitle,
+                      TextStyle(color: Colors.grey[600], fontSize: 12),
+                    ),
+                    const SizedBox(height: 8),
+                    _buildStatusBadge(data),
+                  ],
+                ),
+              ),
+
+              // Integrated Price Card (takes about 2 rows of height visually)
+              if (data.price != null) ...[
+                const SizedBox(width: 12),
+                _buildPriceBadge(data),
+              ],
+            ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildMarqueeOrText(String text, TextStyle style, int limit) {
-    return SizedBox(
-      height: style.fontSize! + 6,
-      child: text.length > limit
-          ? Marquee(
-        text: text,
-        style: style,
-        blankSpace: 20,
-        velocity: 30,
-        pauseAfterRound: const Duration(seconds: 2),
-      )
-          : Text(text, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
+// Cleaner Price Badge that sits inside the content
+  Widget _buildPriceBadge(_CardDisplayData data) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.grey[50]?.withValues(alpha: 0.5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey[200]!),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (data.paymentMethod != null) ...[
+            _buildPaymentDisplay(data.paymentMethod!),
+            const SizedBox(width: 8),
+          ],
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Text(
+                CurrencyUtils.formatAmount(data.price ?? 0),
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
+              ),
+              const Text(
+                  "RWF",
+                  style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: Colors.grey)
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMarqueeOrText(String text, TextStyle style) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // 1. Calculate how wide the text actually is in pixels
+        final textPainter = TextPainter(
+          text: TextSpan(text: text.toUpperCase(), style: style),
+          maxLines: 1,
+          textDirection: TextDirection.ltr,
+        )..layout();
+
+        // 2. Check if the text width exceeds the available width of the parent
+        final bool isOverflowing = textPainter.width > constraints.maxWidth;
+
+        return SizedBox(
+          height: (style.fontSize ?? 14) + 8,
+          // Wrap in a Row + Expanded to prevent the "Infinite Width" crash
+          child: isOverflowing
+              ? Marquee(
+            text: text.toUpperCase(),
+            style: style,
+            blankSpace: 30, // Space before the text repeats
+            velocity: 30,
+            pauseAfterRound: const Duration(seconds: 2),
+            accelerationDuration: const Duration(seconds: 1),
+            accelerationCurve: Curves.linear,
+          )
+              : Text(
+            text.toUpperCase(),
+            style: style,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+        );
+      },
     );
   }
 
@@ -124,7 +228,21 @@ class PackageCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: Colors.grey[200]!),
           ),
-          child: Column(
+          child: Row(
+            children: [
+              if (data.paymentMethod != null) _buildPaymentDisplay(data.paymentMethod!),
+              Column(
+                children: [
+                  Text(
+                    CurrencyUtils.formatAmount(data.price ?? 0),
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
+                  ),
+                  const Text("RWF", style: TextStyle(fontSize: 8, color: Colors.grey)),
+                ]
+              ),
+            ]
+          ),
+          /*child: Column(
             children: [
               if (data.paymentMethod != null) _buildPaymentDisplay(data.paymentMethod!),
               const SizedBox(height: 6),
@@ -134,7 +252,7 @@ class PackageCard extends StatelessWidget {
               ),
               const Text("RWF", style: TextStyle(fontSize: 8, color: Colors.grey)),
             ],
-          ),
+          ),*/
         ),
       ],
     );
@@ -165,6 +283,7 @@ class PackageCard extends StatelessWidget {
 
 // Helper class to standardize data for the Card
 class _CardDisplayData {
+  final String id;
   final String title;
   final String subtitle;
   final IconData icon;
@@ -174,6 +293,7 @@ class _CardDisplayData {
   final PaymentMethod? paymentMethod;
 
   _CardDisplayData({
+    required this.id,
     required this.title,
     required this.subtitle,
     required this.icon,
