@@ -1,8 +1,17 @@
+import 'package:apple_passkit/apple_passkit.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/presentation/ui_factory/ui_factory.dart';
+import 'dart:typed_data';
+import 'package:flutter/services.dart';
 
 class IosFactory implements UIFactory {
+  @override
+  Color get primaryColor => const Color(0xFF1A1A1A);
+  @override
+  Color get surfaceColor => const Color(0xFF1A1A1A);
+
+
   @override
   PreferredSizeWidget buildAppBar({
     required String title,
@@ -38,14 +47,29 @@ class IosFactory implements UIFactory {
   }
 
   @override
-  Widget buildButton({required Widget child, required VoidCallback onPressed}) {
-    return CupertinoButton(
-      color: CupertinoColors.activeBlue,
-      borderRadius: BorderRadius.circular(25),
-      onPressed: onPressed,
-      child: child,
+  Widget buildButton({
+    required Widget child,
+    required VoidCallback onPressed,
+    Color? backgroundColor,
+    double? borderRadius,
+  }) {
+    return SizedBox(
+      width: double.infinity, // Ensures it takes full width like your TrackButton
+      child: CupertinoButton(
+        color: backgroundColor ?? CupertinoColors.activeBlue,
+        borderRadius: BorderRadius.circular(borderRadius ?? 12),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        onPressed: onPressed,
+        child: child,
+      ),
     );
   }
+
+
+
+
+
+
 
   @override
   Widget buildInputField({required controller, required hint, icon, keyboardType, onChanged}) {
@@ -258,5 +282,131 @@ class IosFactory implements UIFactory {
       // On iOS, tapping the row should also toggle the switch
       onTap: () => onChanged(!isSelected),
     );
+  }
+
+
+
+  @override
+  Widget buildWalletButton({required VoidCallback onPressed}) {
+    return SizedBox(
+      width: double.infinity,
+      height: 50,
+      child: buildButton(
+        onPressed: onPressed,
+        backgroundColor: CupertinoColors.black, // Apple Requirement
+        borderRadius: 8, // Apple standard for Wallet buttons
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(CupertinoIcons.creditcard_fill, color: Colors.white, size: 22),
+            SizedBox(width: 12),
+            Text(
+              "Add to Apple Wallet",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  void showActionSheet({
+    required BuildContext context,
+    required String title,
+    required List<Widget> actions,
+  }) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) => CupertinoActionSheet(
+        title: Text(title),
+        // In a real app, you might want to pass 'message' as well
+        actions: actions,
+        cancelButton: CupertinoActionSheetAction(
+          onPressed: () => Navigator.pop(context),
+          isDefaultAction: true,
+          child: const Text('Cancel'),
+        ),
+      ),
+    );
+  }
+  @override
+  String getWalletInstruction() => "ACCESS QUICKLY VIA DOUBLE-TAP ON SIDE BUTTON";
+
+  @override
+  Widget buildWalletInstructionText() {
+    return Text(
+      getWalletInstruction(),
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 9,
+        color: Colors.grey[400],
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+
+
+  /*@override
+  Future<void> handleWalletAddition({required String passUrl, Map<String, dynamic>? data}) async {
+    /// 1. CHECK AVAILABILITY
+    /// Before attempting to add, we must ensure the hardware/OS supports PassKit.
+    final bool isAvailable = await _applePasskitPlugin.isPassLibraryAvailable();
+    if (!isAvailable) {
+      // TODO: Implement a user-friendly 'Not Supported' dialog
+      return;
+    }
+
+    try {
+      /// 2. FETCH PASS DATA
+      /// FUTURE IMPLEMENTATION:
+      /// Currently, we might load a local asset for testing.
+      /// In production, you must use an HTTP client (like Dio or http) to:
+      ///   a. Send the [passUrl] to your backend.
+      ///   b. Receive a Stream or List<int> representing the .pkpass binary.
+      ///   c. Convert it to Uint8List.
+
+      // TEMPORARY: Loading a placeholder asset to demonstrate the plugin flow
+      // final Uint8List passBytes = await _fetchPassFromNetwork(passUrl);
+      final ByteData assetData = await rootBundle.load('assets/passes/kgl_sample.pkpass');
+      final Uint8List passBytes = assetData.buffer.asUint8List();
+
+      /// 3. ADD TO NATIVE WALLET
+      /// This triggers the native Apple "Add Pass" view controller.
+      /// The user must manually tap "Add" in the top right corner.
+      await _applePasskitPlugin.addPass(passBytes);
+
+    } catch (e) {
+      /// TODO: Handle specific errors
+      /// - Network timeout during download
+      /// - Invalid signature (Apple requires passes to be signed with your developer cert)
+      debugPrint("iOS PassKit Error: $e");
+    }
+  }
+*/
+  @override
+  Future<void> handleWalletAddition({required String passUrl, Map<String, dynamic>? data}) async {
+    final applePassKit = ApplePassKit();
+
+    // 1. Check if the library is available on this device
+    if (await applePassKit.isPassLibraryAvailable()) {
+      try {
+        /* FUTURE CODE:
+       Replace rootBundle with a network call to download the actual .pkpass file.
+       Example: final response = await http.get(Uri.parse(passUrl));
+       final Uint8List passBytes = response.bodyBytes;
+      */
+
+        // Temporary placeholder using local asset
+        final ByteData assetData = await rootBundle.load('assets/coupon.pkpass');
+        final Uint8List passBytes = assetData.buffer.asUint8List();
+
+        // 2. Present the native Apple "Add Pass" UI
+        await applePassKit.addPass(passBytes);
+      } catch (e) {
+        print("Apple Wallet Error: $e");
+      }
+    }
   }
 }
