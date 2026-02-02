@@ -48,20 +48,22 @@ class IosFactory implements UIFactory {
 
   @override
   Widget buildButton({
+    required BuildContext context,
     required Widget child,
     required VoidCallback onPressed,
     Color? backgroundColor,
     double? borderRadius,
   }) {
-    return SizedBox(
-      width: double.infinity, // Ensures it takes full width like your TrackButton
-      child: CupertinoButton(
-        color: backgroundColor ?? CupertinoColors.activeBlue,
-        borderRadius: BorderRadius.circular(borderRadius ?? 12),
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        onPressed: onPressed,
-        child: child,
-      ),
+    // Logic: Parameter ?? Theme Default
+    final Color finalBgColor = backgroundColor ?? Theme.of(context).colorScheme.primary;
+    final double finalRadius = borderRadius ?? 12.0;
+
+    return CupertinoButton(
+      color: finalBgColor,
+      borderRadius: BorderRadius.circular(finalRadius),
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+      onPressed: onPressed,
+      child: child,
     );
   }
 
@@ -72,15 +74,27 @@ class IosFactory implements UIFactory {
 
 
   @override
-  Widget buildInputField({required controller, required hint, icon, keyboardType, onChanged}) {
+  Widget buildInputField({
+    required context,
+    required controller,
+    required hint,
+    fillColor, // Optional parameter
+    icon,
+    keyboardType,
+    onChanged,
+  }) {
+    final theme = Theme.of(context);
     return CupertinoTextField(
       controller: controller,
       placeholder: hint,
       onChanged: onChanged,
       keyboardType: keyboardType,
       padding: const EdgeInsets.all(16),
-      prefix: icon != null ? Padding(padding: const EdgeInsets.only(left: 12), child: Icon(icon, color: Colors.grey)) : null,
-      decoration: BoxDecoration(color: CupertinoColors.extraLightBackgroundGray, borderRadius: BorderRadius.circular(10)),
+      // Logic: Parameter ?? Theme Surface Container
+      decoration: BoxDecoration(
+        color: fillColor ?? theme.colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(10),
+      ),
     );
   }
 
@@ -287,22 +301,42 @@ class IosFactory implements UIFactory {
 
 
   @override
-  Widget buildWalletButton({required VoidCallback onPressed}) {
+  Widget buildWalletButton({
+    required BuildContext context,
+    required VoidCallback onPressed,
+    Color? backgroundColor,
+    double? borderRadius,
+  }) {
+    final theme = Theme.of(context);
+
     return SizedBox(
       width: double.infinity,
-      height: 50,
+      height: 50, // Standard height for iOS Wallet buttons
       child: buildButton(
+        context: context,
         onPressed: onPressed,
-        backgroundColor: CupertinoColors.black, // Apple Requirement
-        borderRadius: 8, // Apple standard for Wallet buttons
-        child: const Row(
+        // Priority: 1. Manual Override, 2. Brand Scrim (Black), 3. Primary Color
+        //backgroundColor: backgroundColor ?? theme.colorScheme.scrim,
+        //borderRadius: borderRadius ?? 8.0, // Apple standard radius
+        child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(CupertinoIcons.creditcard_fill, color: Colors.white, size: 22),
-            SizedBox(width: 12),
+            const Icon(
+                CupertinoIcons.creditcard_fill,
+                color: Colors.white,
+                size: 22
+            ),
+            const SizedBox(width: 12),
             Text(
               "Add to Apple Wallet",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600, fontSize: 16),
+              style: TextStyle(
+                // Using white here because Wallet buttons are historically black
+                // regardless of light/dark mode for branding.
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+                fontSize: 16,
+                letterSpacing: -0.4,
+              ),
             ),
           ],
         ),
