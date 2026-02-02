@@ -8,25 +8,26 @@ class LiveTrackingCarousel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (activeOrders.isEmpty) return const SizedBox.shrink();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       children: [
-        _buildHeader(),
+        _buildHeader(context),
         const SizedBox(height: 12),
 
-        // This replaces the PageView. It handles height automatically.
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
           physics: const BouncingScrollPhysics(),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start, // Align to top
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: activeOrders.map((order) {
               return Container(
-                // This ensures cards are wide enough on both phone and tablet
                 width: MediaQuery.of(context).size.width * 0.9,
-                padding: const EdgeInsets.only(right: 12, bottom: 10),
-                child: LiveActivityFactory.createCard(order, context),//LiveTrackingCard(order: order),
+                // Adding a bit of padding to avoid shadow clipping
+                padding: const EdgeInsets.only(right: 16, bottom: 12),
+                child: LiveActivityFactory.createCard(order, context),
               );
             }).toList(),
           ),
@@ -35,16 +36,37 @@ class LiveTrackingCarousel extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        const Text(
+        Text(
           "Live Tracking",
-          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.blueAccent),
+          style: theme.textTheme.titleSmall?.copyWith(
+            // Using primary for the brand color (your Gold/Green)
+            // instead of hardcoded BlueAccent
+            color: theme.colorScheme.primary,
+            fontWeight: FontWeight.w900,
+            letterSpacing: 0.5,
+          ),
         ),
         if (activeOrders.length > 1)
-          Text("${activeOrders.length} ACTIVE", style: const TextStyle(color: Colors.grey, fontSize: 10)),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.secondaryContainer,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              "${activeOrders.length} ACTIVE",
+              style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.onSecondaryContainer,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
       ],
     );
   }
