@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+/*
 class LiveDeliveryBar extends StatelessWidget {
   final String from;
   final String to;
@@ -76,4 +76,4 @@ class LiveDeliveryBar extends StatelessWidget {
       style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1),
     );
   }
-}
+}*/
