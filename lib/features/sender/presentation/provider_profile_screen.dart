@@ -11,7 +11,10 @@ class ProviderProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
+      backgroundColor: theme.colorScheme.surface,
       body: CustomScrollView(
         slivers: [
           _buildSliverHeader(context),
@@ -21,78 +24,96 @@ class ProviderProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildMainInfo(),
-                  const SizedBox(height: 20),
-                  _buildStatsRow(),
-                  const Divider(height: 40),
-                  _buildAboutSection(),
-                  const Divider(height: 40),
-                  _buildPaymentSection(provider), // Passing provider to the existing helper
-                  const SizedBox(height: 30),
-                  _buildPortfolioSection(),
-                  const SizedBox(height: 100), // Bottom padding for buttons
+                  _buildMainInfo(context),
+                  const SizedBox(height: 24),
+                  _buildStatsRow(context),
+                  Divider(height: 48, color: theme.colorScheme.outlineVariant),
+                  _buildAboutSection(context),
+                  Divider(height: 48, color: theme.colorScheme.outlineVariant),
+                  _buildPaymentSection(context, provider),
+                  const SizedBox(height: 32),
+                  _buildPortfolioSection(context),
+                  const SizedBox(height: 120),
                 ],
               ),
             ),
           ),
         ],
       ),
-      bottomSheet: _buildBottomButtons(),
+      // bottomSheet color handled in its helper
+      bottomSheet: _buildBottomButtons(context),
     );
   }
 
-  // --- Header with Profile Image ---
   Widget _buildSliverHeader(BuildContext context) {
+    final theme = Theme.of(context);
     return SliverAppBar(
       expandedHeight: 250,
       pinned: true,
-      backgroundColor: Colors.teal[700],
+      backgroundColor: theme.colorScheme.primary, // Brand Primary
+      foregroundColor: theme.colorScheme.onPrimary,
       actions: [
         IconButton(
-          icon: const CircleAvatar(
-            backgroundColor: Colors.white24,
-            child: Icon(Icons.share, color: Colors.white, size: 20),
+          icon: CircleAvatar(
+            backgroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.2),
+            child: Icon(Icons.share, color: theme.colorScheme.onPrimary, size: 20),
           ),
           onPressed: () => ContactUtils.shareProviderProfile(context, provider),
         ),
         const SizedBox(width: 8),
       ],
       flexibleSpace: FlexibleSpaceBar(
-        background: Stack(
-          fit: StackFit.expand,
-          children: [
-            // Optional: Add a subtle background pattern or gradient here
-            Center(
-              child: Hero(
-                tag: 'profile-${provider.name}',
-                child: Container(
-                  width: 120,
-                  height: 120,
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 10)],
-                  ),
-                  child: ClipOval(
-                    child: provider.imageUrl != null
-                        ? Image.network(
-                      provider.imageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stack) => Icon(Icons.person, size: 80, color: Colors.teal[700]),
+        background: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [
+                theme.colorScheme.primary,
+                theme.colorScheme.primaryFixedDim,
+              ],
+            ),
+          ),
+          child: Center(
+            child: Hero(
+              tag: 'profile-${provider.name}',
+              child: Container(
+                width: 130,
+                height: 130,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.surface,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: theme.colorScheme.onPrimary, width: 4),
+                  boxShadow: [
+                    BoxShadow(
+                      color: theme.colorScheme.shadow.withValues(alpha: 0.2),
+                      blurRadius: 15,
                     )
-                        : Icon(Icons.person, size: 80, color: Colors.teal[700]),
-                  ),
+                  ],
+                ),
+                child: ClipOval(
+                  child: provider.imageUrl != null
+                      ? Image.network(
+                    provider.imageUrl!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => Icon(
+                        Icons.person,
+                        size: 80,
+                        color: theme.colorScheme.primaryContainer
+                    ),
+                  )
+                      : Icon(Icons.person, size: 80, color: theme.colorScheme.primary),
                 ),
               ),
             ),
-          ],
+          ),
         ),
       ),
     );
   }
 
-  // --- Name, Specialty, and Location ---
-  Widget _buildMainInfo() {
+  Widget _buildMainInfo(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -100,66 +121,69 @@ class ProviderProfileScreen extends StatelessWidget {
           crossAxisAlignment: WrapCrossAlignment.center,
           children: [
             Text(provider.name,
-                style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold)
-            ),
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                )),
             const SizedBox(width: 8),
-            const Icon(Icons.verified, color: Colors.blue, size: 24),
+            Icon(Icons.verified, color: theme.colorScheme.primary, size: 24),
             if (provider.type == ProviderType.company) ...[
               const SizedBox(width: 8),
               const CompanyBadge(),
             ]
           ],
         ),
+        const SizedBox(height: 4),
         Text("${provider.specialty} • ${provider.location}",
-            style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            )),
       ],
     );
   }
 
-  // --- Quick Stats Row ---
-  Widget _buildStatsRow() {
+  Widget _buildStatsRow(BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceAround,
       children: [
-        _buildStatItem("Rating", provider.rating.toString(), Icons.star),
-        _buildStatItem("Jobs", provider.jobsCompleted.toString(), Icons.check_circle),
-        _buildStatItem("Experience", "5+ Yrs", Icons.trending_up),
+        _buildStatItem(context, "Rating", provider.rating.toString(), Icons.star),
+        _buildStatItem(context, "Jobs", provider.jobsCompleted.toString(), Icons.check_circle),
+        _buildStatItem(context, "Experience", "5+ Yrs", Icons.trending_up),
       ],
     );
   }
 
-  Widget _buildStatItem(String label, String value, IconData icon) {
+  Widget _buildStatItem(BuildContext context, String label, String value, IconData icon) {
+    final theme = Theme.of(context);
     return Column(
       children: [
-        Icon(icon, color: Colors.teal[700]),
-        const SizedBox(height: 5),
-        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-        Text(label, style: const TextStyle(color: Colors.grey, fontSize: 12)),
+        Icon(icon, color: theme.colorScheme.tertiary),
+        const SizedBox(height: 6),
+        Text(value, style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+        Text(label, style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
       ],
     );
   }
 
-  // --- Bio Section ---
-  Widget _buildAboutSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text("About Me", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 10),
-        Text(provider.bio, style: const TextStyle(fontSize: 15, height: 1.5)),
-      ],
-    );
-  }
-
-  // --- Portfolio Gallery ---
-  Widget _buildPortfolioSection() {
+  Widget _buildAboutSection(BuildContext context) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Past Work / Portfolio",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)
-        ),
-        const SizedBox(height: 15),
+        Text("About Me", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 12),
+        Text(provider.bio, style: theme.textTheme.bodyMedium?.copyWith(height: 1.6)),
+      ],
+    );
+  }
+
+  Widget _buildPortfolioSection(BuildContext context) {
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text("Past Work / Portfolio", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 16),
         SizedBox(
           height: 150,
           child: ListView.builder(
@@ -169,10 +193,11 @@ class ProviderProfileScreen extends StatelessWidget {
               width: 150,
               margin: const EdgeInsets.only(right: 12),
               decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(12),
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: theme.colorScheme.outlineVariant),
               ),
-              child: const Icon(Icons.image, color: Colors.white),
+              child: Icon(Icons.image, color: theme.colorScheme.onSurfaceVariant),
             ),
           ),
         ),
@@ -180,80 +205,96 @@ class ProviderProfileScreen extends StatelessWidget {
     );
   }
 
-  // --- Persistent Bottom Buttons ---
-  Widget _buildBottomButtons() {
+  Widget _buildBottomButtons(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(20),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 10, offset: Offset(0, -5))],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => ContactUtils.makeCall(provider.phoneNumber),
-              icon: const Icon(Icons.phone),
-              label: const Text("Call Now"),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.teal[700],
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 15),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ),
-          const SizedBox(width: 15),
-          _buildWhatsAppButton(),
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        border: Border(top: BorderSide(color: theme.colorScheme.outlineVariant)),
+        boxShadow: [
+          BoxShadow(
+              color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -4)
+          )
         ],
       ),
-    );
-  }
-
-  Widget _buildWhatsAppButton() {
-    return Container(
-      decoration: BoxDecoration(color: Colors.green[100], borderRadius: BorderRadius.circular(12)),
-      child: IconButton(
-        icon: const Icon(Icons.message, color: Colors.green),
-        onPressed: () => ContactUtils.openWhatsApp(provider.phoneNumber, provider.name)
+      child: SafeArea( // Added for notched phones
+        child: Row(
+          children: [
+            Expanded(
+              child: ElevatedButton.icon(
+                onPressed: () => ContactUtils.makeCall(provider.phoneNumber),
+                icon: const Icon(Icons.phone),
+                label: const Text("Call Now"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: theme.colorScheme.primary,
+                  foregroundColor: theme.colorScheme.onPrimary,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+              ),
+            ),
+            const SizedBox(width: 16),
+            _buildWhatsAppButton(context),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildPaymentSection(ServiceProvider provider) {
+  Widget _buildWhatsAppButton(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      height: 56, // Match button height
+      width: 56,
+      decoration: BoxDecoration(
+        color: theme.colorScheme.tertiaryContainer, // Semantic use of Tertiary for secondary action
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: IconButton(
+          icon: Icon(Icons.message, color: theme.colorScheme.onTertiaryContainer),
+          onPressed: () => ContactUtils.openWhatsApp(provider.phoneNumber, provider.name)
+      ),
+    );
+  }
+
+  Widget _buildPaymentSection(BuildContext context, ServiceProvider provider) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Accepted Payments",
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 12),
-
-        _buildSecurityWarning(), // Extracted warning card
-
+        Text("Accepted Payments", style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
         const SizedBox(height: 16),
-
-        _buildPaymentMethodsGrid(provider), // Extracted methods list
+        _buildSecurityWarning(context),
+        const SizedBox(height: 20),
+        _buildPaymentMethodsGrid(context, provider),
       ],
     );
   }
 
-// 1. The Safety Warning Card
-  Widget _buildSecurityWarning() {
+  Widget _buildSecurityWarning(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.amber[50],
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.amber[200]!),
+        color: theme.colorScheme.errorContainer.withValues(alpha: 0.3), // Safety warning uses errorContainer
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: theme.colorScheme.errorContainer),
       ),
       child: Row(
         children: [
-          Icon(Icons.gpp_maybe, color: Colors.amber[900]),
+          Icon(Icons.gpp_maybe, color: theme.colorScheme.onErrorContainer),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
               "Paying through the app is more secured. Claiming in case of a problem is much faster.",
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500, height: 1.4),
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onErrorContainer,
+                fontWeight: FontWeight.w600,
+              ),
             ),
           ),
         ],
@@ -261,62 +302,58 @@ class ProviderProfileScreen extends StatelessWidget {
     );
   }
 
-// 2. The Chips/Badges for each Payment Method
-  Widget _buildPaymentMethodsGrid(ServiceProvider provider) {
+  Widget _buildPaymentMethodsGrid(BuildContext context, ServiceProvider provider) {
     return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: provider.acceptedPayments.map((method) {
-        final bool isCash = method == PaymentMethod.cash;
-
-        return Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-          decoration: BoxDecoration(
-            color: isCash ? Colors.grey[50] : Colors.white,
-            border: Border.all(
-              color: isCash ? Colors.grey[300]! : Colors.teal.withValues(alpha:0.5),
-              width: isCash ? 1 : 1.5,
-            ),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildPaymentIcon(method),
-              const SizedBox(width: 8),
-              Text(
-                method.label,
-                style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: isCash ? FontWeight.normal : FontWeight.bold,
-                ),
-              ),
-              if (!isCash) ...[
-                const SizedBox(width: 6),
-                const Icon(Icons.verified, size: 14, color: Colors.teal),
-              ]
-            ],
-          ),
-        );
-      }).toList(),
+      spacing: 12,
+      runSpacing: 12,
+      children: provider.acceptedPayments.map((method) => _buildPaymentChip(context, method)).toList(),
     );
   }
 
-// 3. Icon Logic for Payments
-  Widget _buildPaymentIcon(PaymentMethod method) {
+  Widget _buildPaymentChip(BuildContext context, PaymentMethod method) {
+    final theme = Theme.of(context);
+    final bool isCash = method == PaymentMethod.cash;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      decoration: BoxDecoration(
+        color: isCash ? theme.colorScheme.surfaceContainer : theme.colorScheme.secondaryContainer,
+        border: Border.all(
+          color: isCash ? theme.colorScheme.outlineVariant : theme.colorScheme.secondary.withValues(alpha: 0.2),
+        ),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildPaymentIcon(context, method),
+          const SizedBox(width: 8),
+          Text(
+            method.label,
+            style: theme.textTheme.labelLarge?.copyWith(
+              fontWeight: isCash ? FontWeight.normal : FontWeight.bold,
+              color: isCash ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.onSecondaryContainer,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPaymentIcon(BuildContext context, PaymentMethod method) {
     if (method.assetPath != null) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(4),
-        child: Image.asset(method.assetPath!, width: 24, height: 24, fit: BoxFit.cover),
+        child: Image.asset(method.assetPath!, width: 20, height: 20, fit: BoxFit.cover),
       );
     }
-    return Icon(method.icon, size: 20, color: Colors.grey[600]);
+    return Icon(method.icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant);
   }
 }
 
 class ServiceProvider {
   final String name;
-  final String specialty;
+  final Speciality specialty;
   final String location;
   final double rating;
   final int jobsCompleted;
