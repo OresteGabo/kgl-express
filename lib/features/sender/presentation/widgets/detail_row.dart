@@ -14,23 +14,29 @@ class DetailRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 20),
       child: Row(
-        // Aligns icon to the top so it stays fixed even if 'value' wraps to 5 lines
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Semantic Icon Container
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              // Using a subtle container surface color
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(icon, color: Colors.grey[600], size: 20),
+            child: Icon(
+              icon,
+              color: theme.colorScheme.onSurfaceVariant,
+              size: 20,
+            ),
           ),
           const SizedBox(width: 16),
 
-          // REQUIRED: Expanded tells the Column to only take available width
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -38,9 +44,9 @@ class DetailRow extends StatelessWidget {
               children: [
                 Text(
                   title.toUpperCase(),
-                  style: TextStyle(
-                    color: Colors.grey[500],
-                    fontSize: 10,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    // Muted color for labels
+                    color: theme.colorScheme.outline,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 0.5,
                   ),
@@ -48,15 +54,14 @@ class DetailRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  // These three properties ensure NO OVERFLOW regardless of string length
                   softWrap: true,
-                  overflow: TextOverflow.visible, // Text flows to next line
+                  overflow: TextOverflow.visible,
                   textAlign: TextAlign.left,
-                  style: const TextStyle(
+                  style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Colors.black87,
-                    height: 1.3, // Adds breathing room between wrapped lines
+                    // Dynamic text color that adapts to theme background
+                    color: theme.colorScheme.onSurface,
+                    height: 1.3,
                   ),
                 ),
               ],
