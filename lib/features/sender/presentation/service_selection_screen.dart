@@ -36,7 +36,7 @@ class ServiceSelectionScreen extends StatefulWidget {
 class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   // Renamed variables for clarity
   List<int> _selectedServiceIds = [0, 1, 2, 3, 4];
-  final int maxPinnedServices = 8;
+  final int maxPinnedServices = 18;
   final int minPinnedServices = 2;
 
   // Inside _ServiceSelectionScreenState, add a controller
@@ -44,24 +44,26 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
 
 // Add this helper method to build the Search Bar
   Widget _buildSearchBar() {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: theme.colorScheme.surfaceContainer,
         borderRadius: BorderRadius.circular(12),
       ),
       child: TextField(
         controller: _searchController,
+        style: theme.textTheme.bodyLarge?.copyWith(color: theme.colorScheme.onSurface),
         decoration: InputDecoration(
-          hintText: "Search for services (e.g. Plumber, Food...)",
-          prefixIcon: const Icon(Icons.search, color: Colors.grey),
+          hintText: "Search for services...",
+          hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+          prefixIcon: Icon(Icons.search, color: theme.colorScheme.primary),
           border: InputBorder.none,
           contentPadding: const EdgeInsets.symmetric(vertical: 15),
-          // Monetization hint: You could add a "Voice Search" icon here
           suffixIcon: _searchController.text.isNotEmpty
               ? IconButton(
-              icon: const Icon(Icons.clear),
-              onPressed: () => setState(() => _searchController.clear())
+            icon: Icon(Icons.clear, color: theme.colorScheme.onSurfaceVariant),
+            onPressed: () => setState(() => _searchController.clear()),
           )
               : null,
         ),
@@ -93,71 +95,80 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   }
   void _showServicePicker() {
     List<int> tempSelected = List.from(_selectedServiceIds);
-    String searchQuery = ""; // Local state for filtering
-
+    String searchQuery = "";
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
-      ),
+      backgroundColor: Colors.transparent, // Let Container handle color
       builder: (context) {
+        final theme = Theme.of(context);
         final ui = AppUI.factory;
+
         return StatefulBuilder(
           builder: (context, setModalState) {
-            // Filter the master list based on search
             final filteredServices = rwandaServices.where((s) {
               return s.name.toLowerCase().contains(searchQuery.toLowerCase());
             }).toList();
 
             return Container(
               padding: const EdgeInsets.all(24),
-              height: MediaQuery.of(context).size.height * 0.8, // Slightly taller for search
+              height: MediaQuery.of(context).size.height * 0.8,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface, // Adaptive background
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(25)),
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Customize your Grid",
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                  Text("Customize your Grid",
+                      style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 15),
 
-                  // 1. Search Bar inside the Modal
+                  // THEMED MODAL SEARCH BAR
                   Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[100],
+                      color: theme.colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: TextField(
-                      decoration: const InputDecoration(
+                      style: TextStyle(color: theme.colorScheme.onSurface),
+                      decoration: InputDecoration(
                         hintText: "Search services...",
-                        prefixIcon: Icon(Icons.search, size: 20),
+                        hintStyle: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                        prefixIcon: Icon(Icons.search, size: 20, color: theme.colorScheme.onSurfaceVariant),
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.symmetric(vertical: 12),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12),
                       ),
-                      onChanged: (value) {
-                        setModalState(() => searchQuery = value);
-                      },
+                      onChanged: (value) => setModalState(() => searchQuery = value),
                     ),
                   ),
                   const SizedBox(height: 15),
 
-                  // 2. The Filtered List
                   Expanded(
                     child: filteredServices.isEmpty
-                        ? const Center(child: Text("No services found."))
+                        ? Center(
+                      child: Text(
+                        "No services found.",
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
+                      ),
+                    )
                         : ListView.builder(
                       itemCount: filteredServices.length,
                       itemBuilder: (context, index) {
                         final service = filteredServices[index];
-                        // We must find the original index in the master list
-                        // to keep the _selectedServiceIds accurate
+
+                        // Important: Get the consistent index from the master list
                         final originalIndex = rwandaServices.indexOf(service);
                         final isSelected = tempSelected.contains(originalIndex);
+
+                        // Get the same color used in the grid
+                        final dynamicColor = _getServiceColor(context, originalIndex);
 
                         return ui.buildSelectionTile(
                           title: service.name,
                           icon: service.icon,
-                          iconColor: service.color,
+                          iconColor: dynamicColor, // <--- Dynamic Theme Color applied
                           isSelected: isSelected,
                           onChanged: (bool? value) {
                             setModalState(() {
@@ -182,12 +193,14 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                   ),
 
                   const SizedBox(height: 10),
-                  // 3. Apply Button
+
+                  // THEMED APPLY BUTTON
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
+                        backgroundColor: theme.colorScheme.primary, // Brand Primary
+                        foregroundColor: theme.colorScheme.onPrimary, // Contrast Text
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       ),
@@ -195,7 +208,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                         setState(() => _selectedServiceIds = List.from(tempSelected));
                         Navigator.pop(context);
                       },
-                      child: const Text("Apply Changes", style: TextStyle(color: Colors.white)),
+                      child: const Text("Apply Changes", style: TextStyle(fontWeight: FontWeight.bold)),
                     ),
                   )
                 ],
@@ -206,36 +219,35 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
       },
     );
   }
-
-  // Place these inside your _ServiceSelectionScreenState class
-
   void _showLimitReachedSnack() {
-    ScaffoldMessenger.of(context).clearSnackBars(); // Clears any existing snackbar first
+    final theme = Theme.of(context);
+    ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: const Text("Limit reached! Remove a service to add a new one."),
-        backgroundColor: Colors.orange[800],
+        backgroundColor: theme.colorScheme.errorContainer, // Standard M3 error role
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
         action: SnackBarAction(
-          label: "UPGRADE", // Monetization Hook
-          textColor: Colors.white,
-          onPressed: () {
-            // Future: Navigate to a subscription or "Premium" info screen
-          },
+          label: "UPGRADE",
+          textColor: theme.colorScheme.onErrorContainer,
+          onPressed: () {},
         ),
       ),
     );
   }
 
+  // Place these inside your _ServiceSelectionScreenState class
+
+
+
   void _showMinLimitSnack() {
+    final theme = Theme.of(context);
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text("Please keep at least $minPinnedServices services for your shortcuts."),
-        backgroundColor: Colors.red[700],
+        content: Text("Please keep at least $minPinnedServices services."),
+        backgroundColor: theme.colorScheme.inverseSurface,
         behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 2),
       ),
     );
   }
@@ -244,6 +256,7 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
   Widget build(BuildContext context) {
     final ui = AppUI.factory;
     final promotedPro = allDummyProviders[0];
+    final theme = Theme.of(context);
 
     return Scaffold(
       appBar: ui.buildAppBar(title: "Order a Service"),
@@ -252,16 +265,15 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("What do you need help with?",
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text("What do you need help with?",
+                style: theme.textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
 
             const SizedBox(height: 10),
-            _buildSearchBar(), // <--- NEW SEARCH BAR HERE
+            _buildSearchBar(),
 
             const SizedBox(height: 20),
-            const Text("Your Shortcuts",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
-            //const SizedBox(height: 15),
+            Text("Your Shortcuts",
+                style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.secondary)),
             const SizedBox(height: 20),
 
             GridView.builder(
@@ -278,23 +290,27 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
                 if (index == _selectedServiceIds.length) {
                   return WigglingCustomizeButton(onTap: _showServicePicker);
                 }
+
+                // 1. Get the ID from your selected list
                 final serviceIndex = _selectedServiceIds[index];
-                return _buildCategoryCard(rwandaServices[serviceIndex], context);
+
+                // 2. Map that ID to the specific service and a theme color
+                // We use serviceIndex so the color stays consistent for that specific service
+                final service = rwandaServices[serviceIndex];
+                final dynamicColor = _getServiceColor(context, serviceIndex);
+
+                return _buildCategoryCard(service, context, dynamicColor);
               },
             ),
 
             const SizedBox(height: 32),
-            const Text("Featured Professionals",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text("Featured Professionals",
+                style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold, color: theme.colorScheme.onSurface)),
             const SizedBox(height: 15),
 
             _buildMonetizedWrapper(
               label: "SPONSORED",
-              color: Colors.orange,
-              child: ProviderTile(
-                pro: promotedPro,
-                onTap: () => _navigateToProfile(context, promotedPro),
-              ),
+              child: ProviderTile(pro: promotedPro, onTap: () {_navigateToProfile(context, promotedPro);}),
             ),
           ],
         ),
@@ -302,7 +318,9 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
     );
   }
 
-  Widget _buildCategoryCard(RwandaService service, BuildContext context) {
+
+  Widget _buildCategoryCard(RwandaService service, BuildContext context, Color brandColor) {
+    final theme = Theme.of(context);
     return InkWell(
       onTap: () => Navigator.push(
         context,
@@ -311,47 +329,58 @@ class _ServiceSelectionScreenState extends State<ServiceSelectionScreen> {
       borderRadius: BorderRadius.circular(15),
       child: Container(
         decoration: BoxDecoration(
-          color: service.color.withValues(alpha:0.1),
+          // We use a very light version of the brand color for the background
+          color: brandColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(15),
-          border: Border.all(color: service.color.withValues(alpha:0.2), width: 1),
+          border: Border.all(color: brandColor.withValues(alpha: 0.2)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(service.icon, size: 32, color: service.color),
+            Icon(service.icon, size: 32, color: brandColor), // Icon uses the brand color
             const SizedBox(height: 8),
-            Text(service.name,
-                textAlign: TextAlign.center,
-                style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11)),
+            Text(
+              service.name,
+              textAlign: TextAlign.center,
+              style: theme.textTheme.labelMedium?.copyWith(
+                fontWeight: FontWeight.w600,
+                color: theme.colorScheme.onSurface, // Text stays standard for readability
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildMonetizedWrapper({required String label, required Color color, required Widget child}) {
+
+  Widget _buildMonetizedWrapper({required String label, required Widget child}) {
+    final theme = Theme.of(context);
     return Stack(
       children: [
         child,
         Positioned(
-          top: 10,
-          right: 10,
+          top: 10, right: 10,
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
             decoration: BoxDecoration(
-              color: color,
+              // Tertiary is great for 'Promoted' or 'Secondary' callouts
+              color: theme.colorScheme.tertiary,
               borderRadius: BorderRadius.circular(4),
             ),
             child: Text(
               label,
-              style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  color: theme.colorScheme.onTertiary,
+                  fontSize: 8,
+                  fontWeight: FontWeight.bold
+              ),
             ),
           ),
         ),
       ],
     );
   }
-
   void _navigateToProfile(BuildContext context, dynamic pro) {
     Navigator.push(context, MaterialPageRoute(builder: (context) => ProviderProfileScreen(provider: pro)));
   }
@@ -393,25 +422,30 @@ class _WigglingCustomizeButtonState extends State<WigglingCustomizeButton>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return RotationTransition(
       turns: _animation,
       child: InkWell(
         onTap: widget.onTap,
-        borderRadius: BorderRadius.circular(15),
         child: CustomPaint(
-          painter: PremiumDashPainter(),
+          // Pass the theme color to the painter
+          painter: PremiumDashPainter(color: theme.colorScheme.outlineVariant),
           child: Container(
             decoration: BoxDecoration(
-              color: Colors.grey[50],
+              color: theme.colorScheme.surfaceContainerLow,
               borderRadius: BorderRadius.circular(15),
             ),
-            child: const Column(
+            child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.add_circle_outline, size: 30, color: Colors.grey),
-                SizedBox(height: 4),
-                Text("Customize",
-                  style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold, fontSize: 12),
+                Icon(Icons.add_circle_outline, size: 30, color: theme.colorScheme.onSurfaceVariant),
+                const SizedBox(height: 4),
+                Text(
+                  "Customize",
+                  style: theme.textTheme.labelMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ],
             ),
@@ -423,12 +457,15 @@ class _WigglingCustomizeButtonState extends State<WigglingCustomizeButton>
 }
 
 class PremiumDashPainter extends CustomPainter {
+  final Color color;
+  PremiumDashPainter({required this.color});
+
   @override
   void paint(Canvas canvas, Size size) {
     double dashWidth = 8, dashSpace = 4;
     final paint = Paint()
-      ..color = Colors.grey[400]!
-      ..strokeWidth = 2.5 // Thick, professional dashed look
+      ..color = color
+      ..strokeWidth = 2.0 // Thick, professional dashed look
       ..style = PaintingStyle.stroke;
 
     final RRect rrect = RRect.fromLTRBR(0, 0, size.width, size.height, const Radius.circular(15));
@@ -450,26 +487,24 @@ class PremiumDashPainter extends CustomPainter {
 class RwandaService {
   final String name;
   final IconData icon;
-  final Color color;
-  RwandaService({required this.name, required this.icon, required this.color});
+  RwandaService({required this.name, required this.icon});
 }
 
-// Add this to the bottom of your file
-Widget _previewWrapper(Widget child) {
-  return MaterialApp(
-    theme: ThemeData(
-      useMaterial3: true,
-      primarySwatch: Colors.green, // Match your app brand
-    ),
-    debugShowCheckedModeBanner: false,
-    home: Scaffold(body: child),
-  );
+
+Color _getServiceColor(BuildContext context, int index) {
+  final colorScheme = Theme.of(context).colorScheme;
+
+  // These roles provide much better saturation for icons
+  final List<Color> palette = [
+    colorScheme.primary,           // Strong Gold
+    colorScheme.tertiary,          // Strong Green
+    colorScheme.secondary,         // Strong Olive
+    colorScheme.primaryFixedDim,   // Medium-Strong Gold (Better than Container)
+    colorScheme.tertiaryFixedDim,  // Medium-Strong Green
+    colorScheme.secondaryFixedDim, // Medium-Strong Olive
+    colorScheme.error,             // Red (Great for contrast)
+    colorScheme.inversePrimary,    // A different shade of the brand gold
+  ];
+
+  return palette[index % palette.length];
 }
-
-@Preview(name: 'Full Screen View')
-Widget previewScreen() => _previewWrapper(const ServiceSelectionScreen());
-
-@Preview(name: 'Button Only')
-Widget previewBtn() => _previewWrapper(
-    Center(child: WigglingCustomizeButton(onTap: () {}))
-);
