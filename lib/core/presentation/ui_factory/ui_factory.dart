@@ -4,16 +4,17 @@ import 'package:flutter/cupertino.dart';
 
 // 1. The Contract: What must every OS implementation provide?
 abstract class UIFactory {
-// Brand Colors
-  Color get primaryColor;
-  Color get surfaceColor;
   Widget buildInputField({
+    required BuildContext context,
     required TextEditingController controller,
     required String hint,
+    Color? fillColor,       // Optional override
     IconData? icon,
     TextInputType? keyboardType,
     Function(String)? onChanged,
   });
+
+
   Widget buildCard({required Widget child, EdgeInsets? padding});
   Widget buildVerifiedInputField({
     required TextEditingController controller,
@@ -31,12 +32,13 @@ abstract class UIFactory {
     Color? foregroundColor,
   });
 
-  // Interaction
-  Widget buildButton({
-    required Widget child,
+
+
+  Widget buildWalletButton({
+    required BuildContext context,
     required VoidCallback onPressed,
-    Color? backgroundColor, // Allow overrides for Wallet Black
-    double? borderRadius,   // Allow overrides for Apple/Google standards
+    Color? backgroundColor,
+    double? borderRadius,
   });
 
 
@@ -82,8 +84,13 @@ abstract class UIFactory {
     required ValueChanged<bool?> onChanged,
   });
 
-  Widget buildWalletButton({required VoidCallback onPressed});
-
+  Widget buildButton({
+    required BuildContext context,
+    required Widget child,
+    required VoidCallback onPressed,
+    Color? backgroundColor,
+    double? borderRadius,
+  });
 
   void showActionSheet({
     required BuildContext context,
