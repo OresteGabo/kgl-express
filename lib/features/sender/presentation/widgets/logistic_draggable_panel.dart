@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/constants/mock_data.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
+import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/package_card.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/payment_summary.dart';
@@ -231,7 +232,21 @@ class LogisticsDraggablePanel extends StatelessWidget {
                       PaymentSummary( order: order),
 
                       const SizedBox(height: 30),
-                      TrackButton( order:order),
+                      AppUI.factory.buildButton(
+                        onPressed: () => Navigator.pop(context),
+                        // No backgroundColor passed here = it automatically uses your Brand Primary!
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(isInTransit ? Icons.map : Icons.arrow_back, color: Colors.white),
+                            const SizedBox(width: 12),
+                            Text(
+                              isInTransit ? "Open Live Map" : "Close Details",
+                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                            ),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -331,6 +346,15 @@ class LogisticsDraggablePanel extends StatelessWidget {
                 style: TextStyle(color: Colors.grey[500], fontSize: 11)),
           ],
         ),
+        const Spacer(), // Pushes the following icon to the right
+        IconButton(
+          onPressed: () {
+            // Logic to show a full-screen or popup QR code
+            print("Opening QR Code for Boarding...");
+          },
+          icon: const Icon(Icons.qr_code_scanner, color: Colors.black87, size: 28),
+          tooltip: "Show QR Code",
+        ),
       ],
     );
   }
@@ -372,10 +396,9 @@ class LogisticsDraggablePanel extends StatelessWidget {
     );
   }
 
-
-
 // 4. HELPER: Main Ticket Card
   Widget _buildTicketMainBody(BusTicketModel ticket) {
+    final ui = AppUI.factory;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -432,20 +455,22 @@ class LogisticsDraggablePanel extends StatelessWidget {
           const SizedBox(height: 40),
 
           // QR/Data Matrix Section
+          // QR/Data Matrix Section
           Center(
             child: Column(
               children: [
-                const Icon(Icons.qr_code_2_outlined, size: 160, color: Colors.black),
-                const SizedBox(height: 12),
-                const Text(
-                  "SCAN AT BOARDING",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.5,
-                    fontSize: 10,
-                    color: Colors.grey,
-                  ),
+                const SizedBox(height: 20),
+              AppUI.factory.buildWalletButton(
+                onPressed: () => AppUI.factory.handleWalletAddition(
+                  passUrl: "https://api.kglexpress.com/passes/123",
+                  data: {
+                    "jwt": "your-google-wallet-signed-token",
+                  },
                 ),
+              ),
+                const SizedBox(height: 12),
+                // The factory now decides which text AND style to show
+                AppUI.factory.buildWalletInstructionText(),
               ],
             ),
           ),
@@ -545,18 +570,6 @@ class LogisticsDraggablePanel extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildPaymentRow(BusTicketModel ticket) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        _InfoBlock(label: "PAYMENT METHOD", value: ticket.paymentMethod.label),
-        ticket.paymentMethod.assetPath != null
-            ? Image.asset(ticket.paymentMethod.assetPath!, width: 32)
-            : Icon(ticket.paymentMethod.icon, size: 28, color: Colors.blueGrey),
-      ],
     );
   }
 
