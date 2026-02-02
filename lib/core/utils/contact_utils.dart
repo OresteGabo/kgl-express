@@ -14,6 +14,82 @@ class ContactUtils {
     }
   }
 
+
+  /// Make a whatsapp call request
+  static Future<void> makeWhatsappCall(String number, String name) async {
+    final cleanNumber = number.replaceAll(RegExp(r'[\+\s\-\(\)]'), '');
+
+    final message = Uri.encodeComponent(
+        "Hello $name, I'm calling you from KGL Express. Are you available for a WhatsApp call?"
+    );
+
+    final Uri url = Uri.parse(
+      'https://wa.me/$cleanNumber?text=$message',
+    );
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(
+        url,
+        mode: LaunchMode.externalApplication,
+      );
+    } else {
+      throw 'Could not open WhatsApp';
+    }
+  }
+
+  static void showCallOptions(BuildContext context, ServiceProvider motar) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (_) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+
+                const Text(
+                  'Contact via',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+
+                /// Normal phone call
+                ListTile(
+                  leading: const Icon(Icons.call, color: Colors.blue),
+                  title: const Text('Phone call'),
+                  subtitle: Text(motar.phoneNumber),
+                  onTap: () {
+                    Navigator.pop(context);
+                    ContactUtils.makeCall(motar.phoneNumber);
+                  },
+                ),
+
+                /// WhatsApp call request
+                ListTile(
+                  leading: const Icon(Icons.whatshot, color: Colors.green),
+                  title: const Text('WhatsApp call'),
+                  subtitle: const Text('Open chat and request a call'),
+                  onTap: () {
+                    Navigator.pop(context);
+                    ContactUtils.makeWhatsappCall(
+                      motar.phoneNumber,
+                      motar.name,
+                    );
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
   /// Opens WhatsApp with a pre-filled message
   static Future<void> openWhatsApp(String number, String name) async {
     // Clean the number: remove '+', ' ', '-', etc.
