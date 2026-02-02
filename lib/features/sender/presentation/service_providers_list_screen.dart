@@ -18,7 +18,7 @@ class _ServiceProvidersListScreenState extends State<ServiceProvidersListScreen>
   // 1. Logic to filter providers based on the service passed to the widget
   List<ServiceProvider> get _filteredProviders {
     return allDummyProviders
-        .where((pro) => pro.specialty.contains(widget.service.name))
+        .where((pro) => pro.specialty.label.contains(widget.service.name))
         .toList();
   }
 
