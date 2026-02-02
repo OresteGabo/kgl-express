@@ -69,6 +69,14 @@ enum Speciality{
     label:"Laundry",
     icon:Icons.local_laundry_service,
   ),
+  pestControl(
+    label:"Pest Control",
+    icon:Icons.pest_control,
+  ),
+  deliverer(
+    label:"Delivery",
+    icon:Icons.delivery_dining,
+  ),
   landscaper(
     label:"Landscaping",
     icon:Icons.landscape,
