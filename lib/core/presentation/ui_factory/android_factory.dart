@@ -47,44 +47,56 @@ class AndroidFactory implements UIFactory {
 
   @override
   Widget buildButton({
+    required BuildContext context,
     required Widget child,
     required VoidCallback onPressed,
     Color? backgroundColor,
     double? borderRadius,
   }) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundColor ?? Colors.black,
-          foregroundColor: Colors.white,
-          elevation: 0, // Match your original design
-          padding: const EdgeInsets.symmetric(vertical: 18),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(borderRadius ?? 16)
-          ),
+    final theme = Theme.of(context);
+
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        // Logic: Parameter ?? Theme Primary
+        backgroundColor: backgroundColor ?? theme.colorScheme.primary,
+        foregroundColor: theme.colorScheme.onPrimary,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(borderRadius ?? 16),
         ),
-        child: child,
+        elevation: 0,
       ),
+      child: child,
     );
   }
   @override
-  Widget buildInputField({required controller, required hint, icon, keyboardType, onChanged}) {
+  Widget buildInputField({
+    required context,
+    required controller,
+    required hint,
+    fillColor,
+    icon,
+    keyboardType,
+    onChanged,
+  }) {
+    final theme = Theme.of(context);
     return TextField(
       controller: controller,
       onChanged: onChanged,
       keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
-        prefixIcon: icon != null ? Icon(icon) : null,
         filled: true,
-        fillColor: Colors.grey[100],
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
+        // Logic: Parameter ?? Theme Surface Low
+        fillColor: fillColor ?? theme.colorScheme.surfaceContainerLow,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: BorderSide.none,
+        ),
+        prefixIcon: icon != null ? Icon(icon) : null,
       ),
     );
   }
-
   @override
   Widget buildCard({required Widget child, EdgeInsets? padding}) {
     return Container(
@@ -299,11 +311,16 @@ class AndroidFactory implements UIFactory {
   }
 
   @override
-  Widget buildWalletButton({required VoidCallback onPressed}) {
+  Widget buildWalletButton({
+    required BuildContext context,
+    required VoidCallback onPressed,
+    Color? backgroundColor,
+    double? borderRadius,
+  }) {
+    // We just call the normal buildButton but fill in the "Wallet" specifics
     return buildButton(
+      context: context,
       onPressed: onPressed,
-      backgroundColor: Colors.black, // Google Requirement
-      borderRadius: 24, // Material 3 Pill shape
       child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
