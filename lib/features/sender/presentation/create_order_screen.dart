@@ -121,10 +121,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final ui = AppUI.factory;
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // 1. Adaptive Background
+      backgroundColor: theme.colorScheme.surface,
       appBar: ui.buildAppBar(title: "Send New Item"),
       body: Form(
         key: _formKey,
@@ -132,14 +134,23 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           padding: const EdgeInsets.all(24.0),
           children: [
             const SectionHeader(title: "Delivery Details"),
-            ui.buildInputField(context: context,controller: _pickupController, hint: "Pickup Location", icon: Icons.location_on),
+            ui.buildInputField(
+                context: context,
+                controller: _pickupController,
+                hint: "Pickup Location",
+                icon: Icons.location_on
+            ),
             const LocationConnector(),
-            ui.buildInputField(context: context, controller: _destinationController, hint: "Destination", icon: Icons.flag),
+            ui.buildInputField(
+                context: context,
+                controller: _destinationController,
+                hint: "Destination",
+                icon: Icons.flag
+            ),
 
             const SizedBox(height: 40),
             const SectionHeader(title: "Package Items"),
 
-            // Render dynamic items
             ..._items.asMap().entries.map((e) {
               final index = e.key;
               final currentItem = e.value;
@@ -148,8 +159,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 index: index,
                 item: currentItem,
                 nameController: _itemControllers[index],
-
-                // Fix for Final Name
                 onNameChanged: (newName) {
                   _items[index] = _createItem(
                     currentItem.compatibilityGroup,
@@ -157,9 +166,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     qty: currentItem.quantity,
                   );
                 },
-
                 onRemove: (idx) => _removeItem(idx),
-
                 onGroupChanged: (group) {
                   setState(() {
                     _items[index] = _createItem(
@@ -169,8 +176,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                     );
                   });
                 },
-
-                // Fix for Final Quantity
                 onQtyChanged: (idx, newQty) {
                   setState(() {
                     _items[idx] = _createItem(
@@ -203,32 +208,45 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: _buildConfirmButton(),
+      bottomNavigationBar: _buildConfirmButton(context),
     );
   }
 
-  Widget _buildConfirmButton() {
+  Widget _buildConfirmButton(BuildContext context) {
+    final theme = Theme.of(context);
     final ui = AppUI.factory;
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        // 2. Adaptive Surface for the bottom bar
+        color: theme.colorScheme.surface,
+        border: Border(
+          top: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        ),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
+              color: theme.colorScheme.shadow.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, -5)
           )
         ],
       ),
       child: ui.buildButton(
-        context:context,
+        context: context,
         onPressed: () {
           if (_formKey.currentState?.validate() ?? false) {
             // Handle order logic
           }
         },
-        child: const Text("Request Rider", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        child: Text(
+            "Request Rider",
+            style: TextStyle(
+              // 3. Ensure text color matches the contrast needed for Primary
+                color: theme.colorScheme.onPrimary,
+                fontWeight: FontWeight.bold
+            )
+        ),
       ),
     );
   }
