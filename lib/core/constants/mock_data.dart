@@ -186,25 +186,27 @@ final activeActivities = mockOrders.where((item) {
 }).toList();
 
 
-// Data list for your categories
 final List<RwandaService> rwandaServices = [
-  RwandaService(name: "Mechanic", icon: Icons.settings, color: Colors.blue),
-  RwandaService(name: "Electrician", icon: Icons.bolt, color: Colors.orange),
-  RwandaService(name: "Plumber", icon: Icons.plumbing, color: Colors.cyan),
-  RwandaService(name: "House Cleaning", icon: Icons.cleaning_services, color: Colors.pink),
-  RwandaService(name: "Carpenter", icon: Icons.handyman, color: Colors.brown),
-  RwandaService(name: "Painter", icon: Icons.format_paint, color: Colors.purple),
-  RwandaService(name: "Masonry", icon: Icons.foundation, color: Colors.blueGrey),
-  RwandaService(name: "Welding", icon: Icons.precision_manufacturing, color: Colors.indigo),
-  RwandaService(name: "Tiling", icon: Icons.grid_view, color: Colors.amber[900]!),
-  RwandaService(name: "Landscaping", icon: Icons.landscape, color: Colors.green[800]!),
+  RwandaService(name: "Mechanic", icon: Icons.settings),
+  RwandaService(name: "Electrician", icon: Icons.bolt),
+  RwandaService(name: "Plumber", icon: Icons.plumbing),
+  RwandaService(name: "House Cleaning", icon: Icons.cleaning_services),
+  RwandaService(name: "Carpenter", icon: Icons.handyman),
+  RwandaService(name: "Painter", icon: Icons.format_paint),
+  RwandaService(name: "Masonry", icon: Icons.foundation),
+  RwandaService(name: "Welding", icon: Icons.precision_manufacturing),
+  RwandaService(name: "Tiling", icon: Icons.grid_view),
+  RwandaService(name: "Landscaping", icon: Icons.landscape),
 ];
+
+
+
 
 // Full List for the Listing Pages
 final List<ServiceProvider> allDummyProviders = [
   ServiceProvider(
     name: "Alice Umutoni",
-    specialty: "Expert Electrician",
+    specialty: Speciality.electrician,
     location: "Nyamirambo, Kigali",
     rating: 4.8,
     jobsCompleted: 89,
@@ -213,8 +215,8 @@ final List<ServiceProvider> allDummyProviders = [
     acceptedPayments: [PaymentMethod.momo, PaymentMethod.airtel, PaymentMethod.spenn],
   ),
   ServiceProvider(
-    name: "Jean Paul",
-    specialty: "Master Mechanic",
+    name: "Jean turatsinze",
+    specialty: Speciality.mechanic,
     location: "Kimironko, Kigali",
     rating: 4.9,
     jobsCompleted: 124,
@@ -224,7 +226,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Emmanuel K.",
-    specialty: "Professional Plumber",
+    specialty: Speciality.plumber,
     location: "Kibagabaga, Kigali",
     rating: 4.7,
     jobsCompleted: 210,
@@ -234,7 +236,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Grace M.",
-    specialty: "House Cleaning",
+    specialty: Speciality.houseCleaning,
     location: "Kacyiru, Kigali",
     rating: 4.9,
     jobsCompleted: 340,
@@ -244,7 +246,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Fabrice N.",
-    specialty: "Carpenter",
+    specialty: Speciality.carpenter,
     location: "Gikondo, Kigali",
     rating: 4.6,
     jobsCompleted: 56,
@@ -254,7 +256,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Divine I.",
-    specialty: "Painter",
+    specialty: Speciality.painter,
     location: "Rebero, Kigali",
     rating: 4.8,
     jobsCompleted: 42,
@@ -264,7 +266,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Safi L.",
-    specialty: "Laundry Specialist",
+    specialty: Speciality.laundry,
     location: "Remera, Kigali",
     rating: 4.7,
     jobsCompleted: 156,
@@ -274,7 +276,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Patrick O.",
-    specialty: "AC Repair",
+    specialty: Speciality.acRepair,
     location: "Nyarutarama, Kigali",
     rating: 4.5,
     jobsCompleted: 78,
@@ -283,18 +285,18 @@ final List<ServiceProvider> allDummyProviders = [
     acceptedPayments: [PaymentMethod.momo, PaymentMethod.bkPay, PaymentMethod.card],
   ),
   ServiceProvider(
-    name: "Thierry H.",
-    specialty: "Master Mason",
+    name: "Charité gorki",
+    specialty: Speciality.masonry,
     location: "Masaka, Kigali",
     rating: 4.8,
     jobsCompleted: 450,
-    phoneNumber: "+250788000001",
+    phoneNumber: "+250782223240",
     bio: "Specialist in bricklaying, foundation work, and fence construction. I manage a team of 5 skilled workers for larger projects.",
     acceptedPayments: [PaymentMethod.momo, PaymentMethod.bkPay, PaymentMethod.cash],
   ),
   ServiceProvider(
     name: "Blaise W.",
-    specialty: "Professional Welder",
+    specialty: Speciality.welder,
     location: "Gatsata, Kigali",
     rating: 4.7,
     jobsCompleted: 132,
@@ -304,7 +306,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Solange U.",
-    specialty: "Tiling & Flooring",
+    specialty: Speciality.tiler,
     location: "Busanza, Kigali",
     rating: 4.9,
     jobsCompleted: 75,
@@ -314,7 +316,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "Innocent Z.",
-    specialty: "Landscaping & Paving",
+    specialty: Speciality.landscaper,
     location: "Kigali Heights Area",
     rating: 4.6,
     jobsCompleted: 112,
@@ -324,7 +326,7 @@ final List<ServiceProvider> allDummyProviders = [
   ),
   ServiceProvider(
     name: "KGL Builders Construction specializing Ltd",
-    specialty: "Masonry & Construction",
+    specialty: Speciality.masonry,
     location: "Nyarutarama",
     rating: 4.9,
     jobsCompleted: 500,
