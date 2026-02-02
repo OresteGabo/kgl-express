@@ -6,9 +6,9 @@ import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart
 import 'package:kgl_express/features/sender/presentation/widgets/package_card.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/payment_summary.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/quick_actions_grid.dart';
-import 'package:kgl_express/features/sender/presentation/widgets/track_button.dart';
 import 'package:kgl_express/models/order_model.dart';
 import 'package:marquee/marquee.dart';
+import 'package:path/path.dart';
 
 import 'items_list.dart';
 import 'live_tracking_card.dart';
@@ -233,6 +233,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
 
                       const SizedBox(height: 30),
                       AppUI.factory.buildButton(
+                        context: context,
                         onPressed: () => Navigator.pop(context),
                         // No backgroundColor passed here = it automatically uses your Brand Primary!
                         child: Row(
@@ -290,7 +291,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
                         const SizedBox(height: 30),
                         _buildRouteSection(ticket),
                         const SizedBox(height: 30),
-                        _buildTicketMainBody(ticket),
+                        _buildTicketMainBody(context,ticket),
                         // Extra space for bottom notch
                         SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
                       ],
@@ -397,7 +398,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
   }
 
 // 4. HELPER: Main Ticket Card
-  Widget _buildTicketMainBody(BusTicketModel ticket) {
+  Widget _buildTicketMainBody(BuildContext context,BusTicketModel ticket) {
     final ui = AppUI.factory;
     return Container(
       padding: const EdgeInsets.all(24),
@@ -461,6 +462,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
               children: [
                 const SizedBox(height: 20),
               AppUI.factory.buildWalletButton(
+                context: context,
                 onPressed: () => AppUI.factory.handleWalletAddition(
                   passUrl: "https://api.kglexpress.com/passes/123",
                   data: {
