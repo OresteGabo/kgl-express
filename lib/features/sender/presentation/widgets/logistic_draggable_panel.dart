@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:kgl_express/core/constants/mock_data.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
 import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
+import 'package:kgl_express/core/services/ticket_export_service.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/package_card.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/payment_summary.dart';
@@ -9,11 +10,13 @@ import 'package:kgl_express/features/sender/presentation/widgets/quick_actions_g
 import 'package:kgl_express/models/order_model.dart';
 import 'package:marquee/marquee.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'items_list.dart';
 import 'live_tracking_card.dart';
 import 'order_details_sheet.dart';
-
+import 'dart:io';
 
 
 
@@ -468,6 +471,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
 // 4. HELPER: Main Ticket Card
   Widget _buildTicketMainBody(BuildContext context, BusTicketModel ticket) {
     final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -482,19 +486,34 @@ class LogisticsDraggablePanel extends StatelessWidget {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // 1. Live Status Banner
           _buildStatusBanner(context, "Operator: Bus has arrived at Nyabugogo. You can now board."),
           const SizedBox(height: 24),
+
+          // 2. Passenger Info (Using the 2-line split logic)
           _InfoBlock(label: "PASSENGER", value: ticket.passengerName),
-          Divider(height: 32, color: theme.colorScheme.outlineVariant),
+
+          Divider(height: 40, color: theme.colorScheme.outlineVariant),
+
+          // 3. Vehicle & Payment Info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _InfoBlock(label: "CAR PLATE", value: ticket.carPlate, isHighlight: true),
+              _InfoBlock(
+                  label: "CAR PLATE",
+                  value: ticket.carPlate,
+                  isHighlight: true
+              ),
               _buildPaymentChip(context, ticket),
             ],
           ),
-          Divider(height: 32, color: theme.colorScheme.outlineVariant),
+
+          Divider(height: 40, color: theme.colorScheme.outlineVariant),
+
+          // 4. Logistics Info
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -505,33 +524,65 @@ class LogisticsDraggablePanel extends StatelessWidget {
 
           const SizedBox(height: 40),
 
-          // QR/Data Matrix Section
-          // QR/Data Matrix Section
-          Center(
-            child: Column(
-              children: [
-                const SizedBox(height: 20),
-              AppUI.factory.buildWalletButton(
-                context: context,
-                onPressed: () => AppUI.factory.handleWalletAddition(
-                  passUrl: "https://api.kglexpress.com/passes/123",
-                  data: {
-                    "jwt": "your-google-wallet-signed-token",
-                  },
+          // 5. Paperless Action Section
+          Column(
+            children: [
+              // Primary Action: The "Gateway" to Sharing/Saving
+              SizedBox(
+                width: double.infinity,
+                child: AppUI.factory.buildButton(
+                  context: context,
+                  onPressed: () => _showSuccessPreview(context, ticket),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                          Icons.verified_rounded,
+                          color: theme.colorScheme.onPrimary,
+                          size: 20
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                          "Get Digital Ticket",
+                          style: TextStyle(
+                              color: theme.colorScheme.onPrimary,
+                              fontWeight: FontWeight.bold
+                          )
+                      ),
+                    ],
+                  ),
                 ),
               ),
-                const SizedBox(height: 12),
-                // The factory now decides which text AND style to show
-                AppUI.factory.buildWalletInstructionText(),
-              ],
-            ),
+              const SizedBox(height: 16),
+
+              // Helper Text for Digital Workflow
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                      Icons.cloud_done_outlined,
+                      size: 14,
+                      color: theme.colorScheme.outline
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    "Paperless ticket ready for WhatsApp & Download",
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.outline,
+                      fontSize: 10,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-// Helper for the Success Payment Chip
+
+  // Helper for the Success Payment Chip
   Widget _buildPaymentChip(BuildContext context, BusTicketModel ticket) {
     final theme = Theme.of(context);
     return Column(
@@ -606,6 +657,189 @@ class LogisticsDraggablePanel extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  // 1. HANDLE SHARE (Native Share Sheet)
+  // If this is in a StatelessWidget, add (BuildContext context) to the parameters
+  Future<void> _handleShareTicket(BuildContext context, BusTicketModel ticket) async {
+    try {
+      final file = await TicketExportService.generateTicketPdf(ticket);
+
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path)],
+          subject: 'Bus Ticket - ${ticket.carPlate}',
+          text: 'Sharing my KGL Express ticket for ${ticket.operator}.',
+        ),
+      );
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Unable to open share sheet.")),
+        );
+      }
+    }
+  }
+  // 2. HANDLE DOWNLOAD (Save to Downloads/Documents)
+  Future<void> _handleDownloadTicket(BuildContext context, BusTicketModel ticket) async {
+    try {
+      final File tempFile = await TicketExportService.generateTicketPdf(ticket);
+
+      // Determine path based on Platform
+      String path = "";
+      if (Platform.isAndroid) {
+        path = '/storage/emulated/0/Download';
+      } else {
+        final docs = await getApplicationDocumentsDirectory();
+        path = docs.path;
+      }
+
+      final String fileName = "KGL_${ticket.carPlate}_${DateTime.now().millisecondsSinceEpoch}.pdf";
+      final File destinationFile = File("$path/$fileName");
+
+      await tempFile.copy(destinationFile.path);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.check_circle, color: Theme.of(context).colorScheme.onPrimaryContainer, size: 18),
+                    const SizedBox(width: 8),
+                    Text("Saved Successfully",
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.onPrimaryContainer)),
+                  ],
+                ),
+                const SizedBox(height: 4),
+                Text("File: $fileName",
+                    style: TextStyle(fontSize: 11, color: Theme.of(context).colorScheme.onPrimaryContainer)),
+                Text("Location: $path",
+                    style: TextStyle(fontSize: 10, color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.7))),
+              ],
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      // Fallback to Share if saving fails
+      _handleShareTicket(context, ticket);
+    }
+  }
+  void _showSuccessPreview(BuildContext context, BusTicketModel ticket) {
+    final theme = Theme.of(context);
+
+    showDialog(
+      context: context,
+      barrierDismissible: true, // Now allows tapping outside to close
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        // 1. Adding a close icon for quick exit
+        title: Stack(
+          children: [
+            Align(
+              alignment: Alignment.topRight,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: Icon(Icons.close, color: theme.colorScheme.outline),
+                visualDensity: VisualDensity.compact,
+              ),
+            ),
+            Center(
+              child: Column(
+                children: [
+                  Icon(Icons.stars, color: theme.colorScheme.primary, size: 48),
+                  const SizedBox(height: 16),
+                  const Text("Booking Confirmed", textAlign: TextAlign.center),
+                ],
+              ),
+            ),
+          ],
+        ),
+        content: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerLow,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _buildPreviewRow("Passenger", ticket.passengerName.split(' ')[0]),
+              const SizedBox(height: 8),
+              _buildPreviewRow("Car Plate", ticket.carPlate),
+              const SizedBox(height: 8),
+              _buildPreviewRow("Operator", ticket.operator),
+              const Divider(height: 24),
+              Text(
+                "Your digital ticket is ready. Choose how to receive it below.",
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall,
+              ),
+            ],
+          ),
+        ),
+        actionsPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+        actions: [
+          Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _handleShareTicket(context, ticket);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: theme.colorScheme.onPrimary,
+                  ),
+                  icon: const Icon(Icons.share, size: 18),
+                  label: const Text("Share to WhatsApp / PDF"),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _handleDownloadTicket(context, ticket);
+                  },
+                  icon: const Icon(Icons.file_download, size: 18),
+                  label: const Text("Save to Phone"),
+                ),
+              ),
+              // 2. Clear "Cancel" option for users who clicked by mistake
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: Text(
+                    "Go Back",
+                    style: TextStyle(color: theme.colorScheme.outline)
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+  Widget _buildPreviewRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(value, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+      ],
     );
   }
 }
@@ -710,47 +944,60 @@ class _InfoBlock extends StatelessWidget {
   const _InfoBlock({
     required this.label,
     required this.value,
-    this.isHighlight = false
+    this.isHighlight = false,
   });
+
+  // Helper to split name into two lines
+  List<String> _splitValue(String input) {
+    final trimmed = input.trim();
+    int firstSpace = trimmed.indexOf(' ');
+    if (firstSpace == -1) return [trimmed, ""];
+    return [
+      trimmed.substring(0, firstSpace),
+      trimmed.substring(firstSpace + 1)
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final parts = _splitValue(value.toUpperCase());
 
-    // Use primary for highlights (the Gold/Orange) and onSurface for standard
-    final valueStyle = theme.textTheme.bodyLarge?.copyWith(
-      fontWeight: FontWeight.w800,
+    final labelStyle = theme.textTheme.labelSmall?.copyWith(
+      color: theme.colorScheme.outline,
+      fontSize: 9,
+      fontWeight: FontWeight.bold,
+      letterSpacing: 1.0,
+    );
+
+    final valueStyle = theme.textTheme.titleLarge?.copyWith(
+      fontWeight: FontWeight.w900,
       color: isHighlight ? theme.colorScheme.primary : theme.colorScheme.onSurface,
-    ) ?? const TextStyle();
+      height: 1.1, // Tight spacing for stacked names
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-            label,
-            style: theme.textTheme.labelSmall?.copyWith(
-                color: theme.colorScheme.outline,
-                fontSize: 9,
-                fontWeight: FontWeight.bold
-            )
-        ),
+        Text(label, style: labelStyle),
         const SizedBox(height: 4),
-        SizedBox(
-          height: 20,
-          child: value.length > 15
-              ? Marquee(
-            text: value.toUpperCase(),
-            style: valueStyle,
-            blankSpace: 20,
-            velocity: 30,
-            pauseAfterRound: const Duration(seconds: 2),
-          )
-              : Text(
-            value.toUpperCase(),
-            maxLines: 1,
-            style: valueStyle,
-          ),
+        // Line 1: First Name
+        Text(
+          parts[0],
+          style: valueStyle,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
+        // Line 2: The rest of the name (if exists)
+        if (parts[1].isNotEmpty)
+          Text(
+            parts[1],
+            style: valueStyle?.copyWith(
+              color: valueStyle.color?.withValues(alpha: 0.7), // Slight fade for the second line
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
       ],
     );
   }
