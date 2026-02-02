@@ -334,6 +334,17 @@ final List<ServiceProvider> allDummyProviders = [
     bio: "Full-service construction firm specializing in residential houses.",
     acceptedPayments: [PaymentMethod.bkPay, PaymentMethod.card, PaymentMethod.momo],
     type: ProviderType.company, // <--- Marked as Company
+  ),
+  ServiceProvider(
+    name: "Byiringiro jonathan",
+    specialty: Speciality.deliverer,
+    location: "Nyarutarama",
+    rating: 4.9,
+    jobsCompleted: 500,
+    phoneNumber: "+250780626533",
+    bio: "MOTAR.",
+    acceptedPayments: [PaymentMethod.bkPay, PaymentMethod.card, PaymentMethod.momo],
+    type: ProviderType.individual,
   )
 ];
 
