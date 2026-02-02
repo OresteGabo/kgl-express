@@ -1,8 +1,17 @@
+import 'package:add_to_google_wallet/add_to_google_wallet.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:kgl_express/core/presentation/ui_factory/ui_factory.dart';
+import 'package:add_to_google_wallet/add_to_google_wallet.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AndroidFactory implements UIFactory {
+  @override
+  Color get primaryColor => const Color(0xFF1A1A1A);
+  @override
+  Color get surfaceColor => throw UnimplementedError();
+
+
   @override
   PreferredSizeWidget buildAppBar({
     required String title,
@@ -36,21 +45,30 @@ class AndroidFactory implements UIFactory {
     );
   }
 
-
   @override
-  Widget buildButton({required Widget child, required VoidCallback onPressed}) {
-    return ElevatedButton(
-      onPressed: onPressed,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        minimumSize: const Size(double.infinity, 56),
+  Widget buildButton({
+    required Widget child,
+    required VoidCallback onPressed,
+    Color? backgroundColor,
+    double? borderRadius,
+  }) {
+    return SizedBox(
+      width: double.infinity,
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundColor ?? Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 0, // Match your original design
+          padding: const EdgeInsets.symmetric(vertical: 18),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(borderRadius ?? 16)
+          ),
+        ),
+        child: child,
       ),
-      child: child,
     );
   }
-
   @override
   Widget buildInputField({required controller, required hint, icon, keyboardType, onChanged}) {
     return TextField(
@@ -279,4 +297,93 @@ class AndroidFactory implements UIFactory {
       contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
     );
   }
+
+  @override
+  Widget buildWalletButton({required VoidCallback onPressed}) {
+    return buildButton(
+      onPressed: onPressed,
+      backgroundColor: Colors.black, // Google Requirement
+      borderRadius: 24, // Material 3 Pill shape
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.add_card, color: Colors.white),
+          SizedBox(width: 12),
+          Text("Add to Google Wallet", style: TextStyle(color: Colors.white)),
+        ],
+      ),
+    );
+  }
+
+  @override
+  void showActionSheet({
+    required BuildContext context,
+    required String title,
+    required List<Widget> actions,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      showDragHandle: true, // Native M3 feel
+      builder: (context) {
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Text(
+                  title,
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+                ),
+              ),
+              const Divider(),
+              ...actions,
+              const SizedBox(height: 10),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  @override
+  String getWalletInstruction() => "ACCESS QUICKLY VIA GOOGLE WALLET SHORTCUT";
+
+  @override
+  Widget buildWalletInstructionText() {
+    return Text(
+      getWalletInstruction(),
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 9,
+        color: Colors.grey[400],
+        letterSpacing: 0.5,
+      ),
+    );
+  }
+  @override
+  Future<void> handleWalletAddition({required String passUrl, Map<String, dynamic>? data}) async {
+    final String? jwt = data?['jwt'];
+    if (jwt == null) return;
+
+    // Google Wallet logic: Navigating to the save URL with the JWT
+    // Format: https://pay.google.com/gp/v/save/{encoded_jwt}
+    final String googleWalletUrl = "https://pay.google.com/gp/v/save/$jwt";
+    final Uri uri = Uri.parse(googleWalletUrl);
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'Could not launch $googleWalletUrl';
+      }
+    } catch (e) {
+      print("Google Wallet Error: $e");
+    }
+  }
+
 }
