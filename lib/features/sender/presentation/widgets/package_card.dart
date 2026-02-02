@@ -5,21 +5,24 @@ import 'package:marquee/marquee.dart';
 import 'package:kgl_express/models/order_model.dart';
 
 class PackageCard extends StatelessWidget {
-  final Object item; // Changed from OrderModel to Object
+  final Object item;
   final VoidCallback onTap;
 
   const PackageCard({super.key, required this.item, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    final data = _getDisplayData();
+    final theme = Theme.of(context);
+    final data = _getDisplayData(context); // Pass context to map colors semantically
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 0,
+      // Using surfaceContainer as the card base for M3 consistency
+      color: theme.colorScheme.surface,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
-        side: BorderSide(color: Colors.grey.withValues(alpha: 0.1)),
+        side: BorderSide(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: InkWell(
         onTap: onTap,
@@ -27,12 +30,11 @@ class PackageCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start, // Align icon to top
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildStatusLeading(data),
+              _buildStatusLeading(context, data),
               const SizedBox(width: 16),
-              // Details now takes the rest of the space including the price
-              _buildOrderDetails(data),
+              _buildOrderDetails(context, data),
             ],
           ),
         ),
@@ -40,8 +42,9 @@ class PackageCard extends StatelessWidget {
     );
   }
 
-  // --- UI Logic Extraction ---
-  _CardDisplayData _getDisplayData() {
+  _CardDisplayData _getDisplayData(BuildContext context) {
+    final theme = Theme.of(context);
+
     if (item is OrderModel) {
       final o = item as OrderModel;
       return _CardDisplayData(
@@ -49,6 +52,8 @@ class PackageCard extends StatelessWidget {
         title: o.title,
         subtitle: "To: ${o.destination}",
         icon: o.status.icon,
+        // We assume OrderStatus.color might still be hardcoded,
+        // ideally these should map to theme.colorScheme.primary/tertiary/error
         accentColor: o.status.color,
         statusLabel: o.status.label,
         price: o.price,
@@ -58,24 +63,27 @@ class PackageCard extends StatelessWidget {
       final b = item as BusTicketModel;
       return _CardDisplayData(
         id: b.activityId,
-        title: b.operator, //"this is my operator, ahwe and whe -n it is tooo long ot creatd a ",//,
+        title: b.operator,
         subtitle: "${b.from} ➔ ${b.to}",
         icon: Icons.directions_bus,
-        accentColor: Colors.deepOrange,
+        // Semantic Mapping: Bus tickets use Tertiary (Green/Teal) or Primary
+        accentColor: theme.colorScheme.tertiary,
         statusLabel: b.isActive ? "UPCOMING" : "COMPLETED",
-        // Bus tickets might not need price in history if already paid
         price: null,
       );
     }
-    // Fallback for unknown types
+
     return _CardDisplayData(
-      id:"#",
-        title: "Unknown", subtitle: "", icon: Icons.help, accentColor: Colors.grey, statusLabel: "");
+      id: "#",
+      title: "Unknown",
+      subtitle: "",
+      icon: Icons.help,
+      accentColor: theme.colorScheme.outline,
+      statusLabel: "UNKNOWN",
+    );
   }
 
-  // --- Sub-Widgets adapted to use _CardDisplayData ---
-
-  Widget _buildStatusLeading(_CardDisplayData data) {
+  Widget _buildStatusLeading(BuildContext context, _CardDisplayData data) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -86,37 +94,34 @@ class PackageCard extends StatelessWidget {
     );
   }
 
-  /// TODO When title is too long, the design crash
-  Widget _buildOrderDetails(_CardDisplayData data) {
+  Widget _buildOrderDetails(BuildContext context, _CardDisplayData data) {
+    final theme = Theme.of(context);
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ROW 1: Title and ID
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: _buildMarqueeOrText(
+                  context,
                   data.title,
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                  theme.textTheme.titleSmall!.copyWith(fontWeight: FontWeight.bold),
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 data.id.toUpperCase(),
-                style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontSize: 14,
-                    color: Colors.grey[400]
+                style: theme.textTheme.labelSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: theme.colorScheme.outline,
                 ),
               ),
             ],
           ),
-
           const SizedBox(height: 6),
-
-          // ROW 2: Subtitle and Price Card
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -125,19 +130,18 @@ class PackageCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _buildMarqueeOrText(
+                      context,
                       data.subtitle,
-                      TextStyle(color: Colors.grey[600], fontSize: 12),
+                      theme.textTheme.bodySmall!.copyWith(color: theme.colorScheme.onSurfaceVariant),
                     ),
                     const SizedBox(height: 8),
-                    _buildStatusBadge(data),
+                    _buildStatusBadge(context, data),
                   ],
                 ),
               ),
-
-              // Integrated Price Card (takes about 2 rows of height visually)
               if (data.price != null) ...[
                 const SizedBox(width: 12),
-                _buildPriceBadge(data),
+                _buildPriceBadge(context, data),
               ],
             ],
           ),
@@ -146,32 +150,37 @@ class PackageCard extends StatelessWidget {
     );
   }
 
-// Cleaner Price Badge that sits inside the content
-  Widget _buildPriceBadge(_CardDisplayData data) {
+  Widget _buildPriceBadge(BuildContext context, _CardDisplayData data) {
+    final theme = Theme.of(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: Colors.grey[50]?.withValues(alpha: 0.5),
+        color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: theme.colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           if (data.paymentMethod != null) ...[
-            _buildPaymentDisplay(data.paymentMethod!),
-            const SizedBox(width: 8),
+            _buildPaymentDisplay(context, data.paymentMethod!),
+            const SizedBox(width: 6),
           ],
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
                 CurrencyUtils.formatAmount(data.price ?? 0),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900),
+                style: theme.textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w900),
               ),
-              const Text(
-                  "RWF",
-                  style: TextStyle(fontSize: 7, fontWeight: FontWeight.bold, color: Colors.grey)
+              Text(
+                "RWF",
+                style: theme.textTheme.labelSmall?.copyWith(
+                    fontSize: 8,
+                    fontWeight: FontWeight.bold,
+                    color: theme.colorScheme.outline
+                ),
               ),
             ],
           ),
@@ -180,31 +189,26 @@ class PackageCard extends StatelessWidget {
     );
   }
 
-  Widget _buildMarqueeOrText(String text, TextStyle style) {
+  Widget _buildMarqueeOrText(BuildContext context, String text, TextStyle style) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // 1. Calculate how wide the text actually is in pixels
         final textPainter = TextPainter(
           text: TextSpan(text: text.toUpperCase(), style: style),
           maxLines: 1,
           textDirection: TextDirection.ltr,
         )..layout();
 
-        // 2. Check if the text width exceeds the available width of the parent
         final bool isOverflowing = textPainter.width > constraints.maxWidth;
 
         return SizedBox(
-          height: (style.fontSize ?? 14) + 8,
-          // Wrap in a Row + Expanded to prevent the "Infinite Width" crash
+          height: (style.fontSize ?? 14) + 6,
           child: isOverflowing
               ? Marquee(
             text: text.toUpperCase(),
             style: style,
-            blankSpace: 30, // Space before the text repeats
+            blankSpace: 30,
             velocity: 30,
             pauseAfterRound: const Duration(seconds: 2),
-            accelerationDuration: const Duration(seconds: 1),
-            accelerationCurve: Curves.linear,
           )
               : Text(
             text.toUpperCase(),
@@ -217,67 +221,36 @@ class PackageCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPriceTrailing(_CardDisplayData data) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.end,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.grey[200]!),
-          ),
-          child: Row(
-            children: [
-              if (data.paymentMethod != null) _buildPaymentDisplay(data.paymentMethod!),
-              Column(
-                children: [
-                  Text(
-                    CurrencyUtils.formatAmount(data.price ?? 0),
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-                  ),
-                  const Text("RWF", style: TextStyle(fontSize: 8, color: Colors.grey)),
-                ]
-              ),
-            ]
-          ),
-          /*child: Column(
-            children: [
-              if (data.paymentMethod != null) _buildPaymentDisplay(data.paymentMethod!),
-              const SizedBox(height: 6),
-              Text(
-                CurrencyUtils.formatAmount(data.price ?? 0),
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900),
-              ),
-              const Text("RWF", style: TextStyle(fontSize: 8, color: Colors.grey)),
-            ],
-          ),*/
-        ),
-      ],
-    );
-  }
-
-  Widget _buildStatusBadge(_CardDisplayData data) {
+  Widget _buildStatusBadge(BuildContext context, _CardDisplayData data) {
+    final theme = Theme.of(context);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
       decoration: BoxDecoration(
         color: data.accentColor,
         borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         data.statusLabel.toUpperCase(),
-        style: const TextStyle(color: Colors.white, fontSize: 8, fontWeight: FontWeight.w900),
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: theme.colorScheme.onPrimary, // Contrast logic: usually primary icons use onPrimary
+          fontSize: 8,
+          fontWeight: FontWeight.w900,
+        ),
       ),
     );
   }
 
-  // Reuse your existing _buildPaymentDisplay logic...
-  Widget _buildPaymentDisplay(PaymentMethod method) {
+  Widget _buildPaymentDisplay(BuildContext context, PaymentMethod method) {
+    final theme = Theme.of(context);
     if (method.assetPath != null) {
-      return Image.asset(method.assetPath!, width: 18, height: 18, errorBuilder: (_, _, _) => Icon(method.icon, size: 18));
+      return Image.asset(
+          method.assetPath!,
+          width: 16,
+          height: 16,
+          errorBuilder: (_, _, _) => Icon(method.icon, size: 16, color: theme.colorScheme.onSurfaceVariant)
+      );
     }
-    return Icon(method.icon, size: 18, color: Colors.blueGrey);
+    return Icon(method.icon, size: 16, color: theme.colorScheme.onSurfaceVariant);
   }
 }
 
