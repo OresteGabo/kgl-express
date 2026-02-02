@@ -16,43 +16,24 @@ class PlaceholderHomeScreen extends StatefulWidget {
 
 class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
   final ValueNotifier<double> panelScroll = ValueNotifier(0.45);
-
-  String location = "KIGALI | RW"; // fallback
+  String location = "KIGALI | RW";
   late String formattedDate;
 
   @override
   void initState() {
     super.initState();
-
     final now = DateTime.now();
     formattedDate = DateFormat('EEEE, dd MMM').format(now);
-
     _loadLocation();
-  }
-
-  Future<void> _loadLocation() async {
-    try {
-      final result = await getCityAndCountry();
-      if (mounted) {
-        setState(() {
-          location = result.toUpperCase();
-        });
-      }
-    } catch (_) {
-      // keep fallback if error
-    }
-  }
-
-  @override
-  void dispose() {
-    panelScroll.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      // Use surface instead of white to adapt to Dark Mode
+      backgroundColor: theme.colorScheme.surface,
       body: Stack(
         children: [
           // 1. Animated Map Background
@@ -71,10 +52,12 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
                     ..setTranslationRaw(0.0, parallaxOffset, 0.0),
                   child: ClipRect(
                     child: ImageFiltered(
-                      imageFilter:
-                      ImageFilter.blur(sigmaX: blur, sigmaY: blur),
+                      imageFilter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
                       child: CustomPaint(
-                        painter: KigaliMapPainter(),
+                        // Pass theme color to your painter so map lines adapt
+                        painter: KigaliMapPainter(
+                          //lineColor: theme.colorScheme.outlineVariant.withValues(alpha: 0.3),
+                        ),
                       ),
                     ),
                   ),
@@ -86,8 +69,7 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
           // 2. Top Bar
           SafeArea(
             child: Padding(
-              padding:
-              const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -97,22 +79,21 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
                     children: [
                       Text(
                         location,
-                        style: TextStyle(
-                          color: Colors.grey[600],
-                          fontSize: 10,
+                        style: theme.textTheme.labelSmall?.copyWith(
+                          color: theme.colorScheme.outline,
                           letterSpacing: 2,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       Text(
                         formattedDate,
-                        style: const TextStyle(
+                        style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          color: theme.colorScheme.onSurface,
                         ),
                       ),
                     ],
                   ),
-                  // Notification button here
                 ],
               ),
             ),
@@ -125,6 +106,30 @@ class _PlaceholderHomeScreenState extends State<PlaceholderHomeScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _loadLocation() async {
+    try {
+      // 1. Fetch data from your helper function
+      final result = await getCityAndCountry();
+
+      // 2. Check if the widget is still in the tree before updating UI
+      if (!mounted) return;
+
+      setState(() {
+        // Uppercase for that clean 'KIGALI | RW' aesthetic
+        location = result.toUpperCase();
+      });
+    } catch (e) {
+      // 3. Optional: Handle specific error cases or keep fallback
+      debugPrint("Location Error: $e");
+
+      if (mounted) {
+        setState(() {
+          location = "KIGALI | RW"; // Ensuring fallback is set even on error
+        });
+      }
+    }
   }
 }
 
