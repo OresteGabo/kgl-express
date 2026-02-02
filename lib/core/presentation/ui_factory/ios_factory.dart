@@ -6,11 +6,6 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 
 class IosFactory implements UIFactory {
-  @override
-  Color get primaryColor => const Color(0xFF1A1A1A);
-  @override
-  Color get surfaceColor => const Color(0xFF1A1A1A);
-
 
   @override
   PreferredSizeWidget buildAppBar({
