@@ -8,30 +8,38 @@ class ItemsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           "Items in Package",
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.onSurface,
+          ),
         ),
         const SizedBox(height: 12),
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            // surfaceContainerLow provides a subtle distinction from the main surface
+            color: theme.colorScheme.surfaceContainerLow,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: Colors.grey[200]!),
+            border: Border.all(color: theme.colorScheme.outlineVariant),
           ),
           child: Column(
-            children: order.items.map((item) => _buildItemRow(item)).toList(),
+            children: order.items.map((item) => _buildItemRow(context, item)).toList(),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildItemRow(dynamic item) {
+  Widget _buildItemRow(BuildContext context, dynamic item) {
+    final theme = Theme.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
@@ -39,10 +47,10 @@ class ItemsList extends StatelessWidget {
         children: [
           Text(
             "${item.quantity}x",
-            style: const TextStyle(
+            style: theme.textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.bold,
-              color: Colors.blue,
-              fontSize: 14,
+              // Using Primary for the quantity to make it "pop" without hardcoding blue
+              color: theme.colorScheme.primary,
             ),
           ),
           const SizedBox(width: 12),
@@ -52,12 +60,18 @@ class ItemsList extends StatelessWidget {
               children: [
                 Text(
                   item.name,
-                  style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: theme.colorScheme.onSurface,
+                  ),
                 ),
                 if (item.description != null && item.description!.isNotEmpty)
                   Text(
                     item.description!,
-                    style: TextStyle(color: Colors.grey[600], fontSize: 12, fontStyle: FontStyle.italic),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                      fontStyle: FontStyle.italic,
+                    ),
                   ),
               ],
             ),
