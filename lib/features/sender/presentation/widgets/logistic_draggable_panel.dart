@@ -26,7 +26,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 1. FILTER LIVE ACTIVITIES (Moving or Active)
+    final theme = Theme.of(context);
     final liveActivities = mockOrders.where((o) {
       if (o is OrderModel) return o.status == OrderStatus.inTransit;
       if (o is BusTicketModel) return o.isActive;
@@ -45,11 +45,11 @@ class LogisticsDraggablePanel extends StatelessWidget {
         builder: (context, scrollController) {
           return Container(
             decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FA),
+              color: theme.colorScheme.surfaceContainerLow, // Matches #F8F9FA in light, darkens in dark
               borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
               boxShadow: [
                 BoxShadow(
-                  color: const Color(0xFF1A1C1E).withValues(alpha: 0.08),
+                  color: theme.colorScheme.shadow.withValues(alpha: 0.08),
                   blurRadius: 20,
                   spreadRadius: 2,
                 )
@@ -60,12 +60,9 @@ class LogisticsDraggablePanel extends StatelessWidget {
               child: ListView.builder(
                 controller: scrollController,
                 padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
-                // +1 for the Header Section
                 itemCount: mockOrders.length + 1,
                 itemBuilder: (context, index) {
                   if (index == 0) return _buildHeaderSection(context, liveActivities);
-
-                  // 2. RECENT ACTIVITY LIST (Items after index 0)
                   final item = mockOrders[index - 1];
                   return PackageCard(
                     item: item,
@@ -81,6 +78,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
   }
 
   Widget _buildHeaderSection(BuildContext context, List<Object> liveActivities) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -89,7 +87,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
             width: 40,
             height: 4,
             decoration: BoxDecoration(
-              color: Colors.grey[300],
+              color: theme.colorScheme.outlineVariant,
               borderRadius: BorderRadius.circular(10),
             ),
           ),
@@ -100,12 +98,11 @@ class LogisticsDraggablePanel extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 "Live Tracking",
-                style: TextStyle(
-                  fontSize: 16,
+                style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.w900,
-                  color: Color(0xFF2D3135),
+                  color: theme.colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -113,12 +110,15 @@ class LogisticsDraggablePanel extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.teal.withValues(alpha: 0.1),
+                    color: theme.colorScheme.tertiaryContainer,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     "${liveActivities.length} ACTIVE",
-                    style: const TextStyle(color: Colors.teal, fontSize: 10, fontWeight: FontWeight.bold),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onTertiaryContainer,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
             ],
@@ -145,12 +145,11 @@ class LogisticsDraggablePanel extends StatelessWidget {
 
         const QuickActionsGrid(),
         const SizedBox(height: 32),
-        const Text(
+        Text(
           "Recent Activity",
-          style: TextStyle(
-            fontSize: 18,
+          style: theme.textTheme.titleLarge?.copyWith(
             fontWeight: FontWeight.w900,
-            color: Color(0xFF2D3135),
+            color: theme.colorScheme.onSurface,
             letterSpacing: -0.5,
           ),
         ),
@@ -169,28 +168,28 @@ class LogisticsDraggablePanel extends StatelessWidget {
   }
 
   void _showPackageDetails(BuildContext context, OrderModel order) {
+    final theme = Theme.of(context);
     final bool isInTransit = order.status == OrderStatus.inTransit;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.transparent, // Allow custom styling
+      backgroundColor: Colors.transparent,
       builder: (context) => DraggableScrollableSheet(
         initialChildSize: 0.7,
         minChildSize: 0.5,
         maxChildSize: 0.95,
         expand: false,
         builder: (context, scrollController) => Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(30)),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
           ),
           child: SingleChildScrollView(
             controller: scrollController,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- DYNAMIC HEADER ---
                 if (isInTransit)
                   LiveDetailsHeader(order:order)
                 else
@@ -202,7 +201,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const SizedBox(height: 20),
-                      // Logistics Info
+                      // Logistics Info components usually use theme internally
                       DetailRow(
                           icon: Icons.location_on_outlined,
                           title: "From",
@@ -225,25 +224,24 @@ class LogisticsDraggablePanel extends StatelessWidget {
 
                       // Items List Container
                       ItemsList(order:order),
-
-                      const Divider(height: 40),
-
-                      // Payment Summary
-                      PaymentSummary( order: order),
-
+                      Divider(height: 40, color: theme.colorScheme.outlineVariant),
+                      PaymentSummary(order: order),
                       const SizedBox(height: 30),
                       AppUI.factory.buildButton(
                         context: context,
                         onPressed: () => Navigator.pop(context),
-                        // No backgroundColor passed here = it automatically uses your Brand Primary!
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(isInTransit ? Icons.map : Icons.arrow_back, color: Colors.white),
+                            Icon(isInTransit ? Icons.map : Icons.arrow_back,
+                                color: theme.colorScheme.onPrimary),
                             const SizedBox(width: 12),
                             Text(
                               isInTransit ? "Open Live Map" : "Close Details",
-                              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                  color: theme.colorScheme.onPrimary,
+                                  fontWeight: FontWeight.bold
+                              ),
                             ),
                           ],
                         ),
@@ -261,135 +259,205 @@ class LogisticsDraggablePanel extends StatelessWidget {
 
   // Refactored Ticket Details Section
   void _showTicketDetails(BuildContext context, BusTicketModel ticket) {
+    final theme = Theme.of(context);
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (context) {
-        // Use a Wrap or a ConstrainedBox to give Flutter a clear size target
-        return GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => Navigator.pop(context), // Close when tapping outside
-          child: DraggableScrollableSheet(
-            initialChildSize: 0.85,
-            minChildSize: 0.5,
-            maxChildSize: 0.95,
-            expand: false, // This is key
-            builder: (context, scrollController) {
-              return Container(
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF8F9FA),
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
-                ),
-                child: Stack( // Using Stack to keep handle fixed at top
-                  children: [
-                    ListView( // Using ListView instead of SingleChildScrollView + Column
-                      controller: scrollController,
-                      padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
-                      children: [
-                        _buildTicketHeader(ticket),
-                        const SizedBox(height: 30),
-                        _buildRouteSection(ticket),
-                        const SizedBox(height: 30),
-                        _buildTicketMainBody(context,ticket),
-                        // Extra space for bottom notch
-                        SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
-                      ],
-                    ),
-                    // Fixed Drag Handle
-                    Positioned(
-                      top: 12,
-                      left: 0,
-                      right: 0,
-                      child: Center(child: _buildDragHandle()),
-                    ),
-                  ],
-                ),
-              );
-            },
-          ),
+        return DraggableScrollableSheet(
+          initialChildSize: 0.85,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerLow,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+              ),
+              child: Stack(
+                children: [
+                  ListView(
+                    controller: scrollController,
+                    padding: const EdgeInsets.fromLTRB(24, 40, 24, 24),
+                    children: [
+                      _buildTicketHeader(context, ticket),
+                      const SizedBox(height: 30),
+                      _buildRouteSection(context, ticket),
+                      const SizedBox(height: 30),
+                      _buildTicketMainBody(context, ticket),
+                      SizedBox(height: MediaQuery.of(context).padding.bottom + 20),
+                    ],
+                  ),
+                  Positioned(
+                    top: 12,
+                    left: 0,
+                    right: 0,
+                    child: Center(child: _buildDragHandle(context)),
+                  ),
+                ],
+              ),
+            );
+          },
         );
       },
     );
   }
 
 // 1. HELPER: Drag Handle
-  Widget _buildDragHandle() {
+  Widget _buildDragHandle(BuildContext context) {
     return Container(
       width: 40,
       height: 4,
       decoration: BoxDecoration(
-        color: Colors.grey[300],
+        color: Theme.of(context).colorScheme.outlineVariant,
         borderRadius: BorderRadius.circular(10),
       ),
     );
   }
 
-// 2. HELPER: Operator & Logo
-  Widget _buildTicketHeader(BusTicketModel ticket) {
+  // 2. HELPER: Operator & Logo
+  Widget _buildTicketHeader(BuildContext context, BusTicketModel ticket) {
+    final theme = Theme.of(context);
+
     return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        if (ticket.operatorLogo != null)
-          Image.asset(ticket.operatorLogo!, width: 50, height: 50)
-        else
-          const CircleAvatar(
-            radius: 25,
-            backgroundColor: Colors.deepOrange,
-            child: Icon(Icons.directions_bus, color: Colors.white, size: 28),
-          ),
-        const SizedBox(width: 16),
+        // 1. VEHICLE IDENTITY BLOCK
         Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Text(ticket.operator,
-                style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 18)),
-            Text("Ticket ID: ${ticket.activityId}",
-                style: TextStyle(color: Colors.grey[500], fontSize: 11)),
+            Container(
+              width: 60, // Slightly larger for better presence
+              height: 60,
+              decoration: BoxDecoration(
+                color: theme.colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(18),
+                // Subtle inner shadow effect for depth
+                boxShadow: [
+                  BoxShadow(
+                    color: theme.colorScheme.shadow.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  )
+                ],
+              ),
+              child: ticket.operatorLogo != null
+                  ? Padding(
+                padding: const EdgeInsets.all(10.0),
+                child: Image.asset(ticket.operatorLogo!, fit: BoxFit.contain),
+              )
+                  : Icon(
+                Icons.directions_bus_rounded,
+                color: theme.colorScheme.onPrimaryContainer,
+                size: 34,
+              ),
+            ),
+            const SizedBox(height: 8),
+
+            // REALISTIC LICENSE PLATE
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(4),
+                border: Border.all(
+                  color: theme.colorScheme.outline.withValues(alpha: 0.4),
+                  width: 1.5,
+                ),
+              ),
+              child: Text(
+                ticket.carPlate.toUpperCase(),
+                style: TextStyle(
+                  fontFamily: 'monospace', // Gives it the "stamped" vehicle look
+                  fontWeight: FontWeight.w900,
+                  color: theme.colorScheme.onSurface,
+                  fontSize: 10,
+                  letterSpacing: 1.0,
+                ),
+              ),
+            ),
           ],
         ),
-        const Spacer(), // Pushes the following icon to the right
-        IconButton(
-          onPressed: () {
-            // Logic to show a full-screen or popup QR code
-            print("Opening QR Code for Boarding...");
-          },
-          icon: const Icon(Icons.qr_code_scanner, color: Colors.black87, size: 28),
-          tooltip: "Show QR Code",
+        const SizedBox(width: 18),
+
+        // 2. OPERATOR INFO
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                ticket.operator,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.8,
+                  color: theme.colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  "ID: ${ticket.activityId}",
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSecondaryContainer,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        // 3. ACTION BUTTON (QR)
+        Container(
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surfaceContainerLow,
+            shape: BoxShape.circle,
+          ),
+          child: IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.qr_code_2_rounded, // More "ticket-like" icon
+              color: theme.colorScheme.primary,
+              size: 28,
+            ),
+          ),
         ),
       ],
     );
   }
 
 // 3. HELPER: The Route Section (Now using Column to avoid overflow)
-  Widget _buildRouteSection(BusTicketModel ticket) {
-    return Row( // Use a Row to put the "Path" next to the "Names"
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.center,
+  Widget _buildRouteSection(BuildContext context, BusTicketModel ticket) {
+    final theme = Theme.of(context);
+    return Row(
       children: [
-        // THE VISUAL PATH (Left Side)
         Column(
           children: [
-            Icon(Icons.radio_button_unchecked, size: 16, color: Colors.grey[400]),
+            Icon(Icons.radio_button_unchecked, size: 16, color: theme.colorScheme.outline),
             Container(
               width: 2,
               height: 40,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                // You can use a CustomPainter for a dashed line here
-              ),
+              color: theme.colorScheme.outlineVariant,
             ),
-            const Icon(Icons.location_on, size: 18, color: Colors.deepOrange),
+            Icon(Icons.location_on, size: 18, color: theme.colorScheme.primary),
           ],
         ),
         const SizedBox(width: 20),
-        // THE STATION NAMES (Right Side)
-        Flexible( // Add this to prevent overflow if city names are very long
+        Flexible(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _TicketStation(city: ticket.from, label: "Origin", align: CrossAxisAlignment.start),
+              _TicketStation(city: ticket.from, label: "Origin"),
               const SizedBox(height: 12),
-              _TicketStation(city: ticket.to, label: "Destination", align: CrossAxisAlignment.start),
+              _TicketStation(city: ticket.to, label: "Destination"),
             ],
           ),
         ),
@@ -398,53 +466,35 @@ class LogisticsDraggablePanel extends StatelessWidget {
   }
 
 // 4. HELPER: Main Ticket Card
-  Widget _buildTicketMainBody(BuildContext context,BusTicketModel ticket) {
-    final ui = AppUI.factory;
+  Widget _buildTicketMainBody(BuildContext context, BusTicketModel ticket) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
+            color: theme.colorScheme.shadow.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Align labels to the left
         children: [
-          _buildStatusBanner("Operator: Bus has arrived at Nyabugogo. You can now board."),
+          _buildStatusBanner(context, "Operator: Bus has arrived at Nyabugogo. You can now board."),
           const SizedBox(height: 24),
-
-          // 1. PASSENGER (Full Width)
-          _InfoBlock(
-            label: "PASSENGER",
-            value: ticket.passengerName,
-            // You might want to update _InfoBlock to not use Flexible when it's full width
-          ),
-
-          const Divider(height: 32, color: Color(0xFFF1F1F1)),
-
-          // 2. CAR PLATE & PAYMENT (Grouped together)
+          _InfoBlock(label: "PASSENGER", value: ticket.passengerName),
+          Divider(height: 32, color: theme.colorScheme.outlineVariant),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              _InfoBlock(
-                  label: "CAR PLATE",
-                  value: ticket.carPlate,
-                  isHighlight: true
-              ),
-              _buildPaymentChip(ticket),
+              _InfoBlock(label: "CAR PLATE", value: ticket.carPlate, isHighlight: true),
+              _buildPaymentChip(context, ticket),
             ],
           ),
-
-          const Divider(height: 32, color: Color(0xFFF1F1F1)),
-
-          // 3. DATE & TIME
+          Divider(height: 32, color: theme.colorScheme.outlineVariant),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -482,30 +532,21 @@ class LogisticsDraggablePanel extends StatelessWidget {
   }
 
 // Helper for the Success Payment Chip
-  Widget _buildPaymentChip(BusTicketModel ticket) {
+  Widget _buildPaymentChip(BuildContext context, BusTicketModel ticket) {
+    final theme = Theme.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.end,
-      mainAxisSize: MainAxisSize.min,
       children: [
-        const Text(
-          "PAYMENT STATUS",
-          style: TextStyle(
-            color: Colors.grey,
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 0.5,
-          ),
-        ),
+        Text("PAYMENT STATUS", style: theme.textTheme.labelSmall?.copyWith(color: theme.colorScheme.outline)),
         const SizedBox(height: 6),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.green.withValues(alpha: 0.08),
+            color: theme.colorScheme.tertiaryContainer.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.green.withValues(alpha: 0.15)),
+            border: Border.all(color: theme.colorScheme.tertiaryContainer),
           ),
           child: Row(
-            mainAxisSize: MainAxisSize.min,
             children: [
               // 1. PAYMENT LOGO OR ICON
               if (ticket.paymentMethod.assetPath != null)
@@ -527,25 +568,15 @@ class LogisticsDraggablePanel extends StatelessWidget {
                     size: 14,
                   ),
                 ),
-
-              // 2. PAYMENT LABEL
               Text(
                 ticket.paymentMethod.label.toUpperCase(),
-                style: TextStyle(
-                  color: Colors.green[800],
-                  fontSize: 10,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onTertiaryContainer,
                   fontWeight: FontWeight.w900,
                 ),
               ),
-
               const SizedBox(width: 8),
-
-              // 3. SUCCESS CHECKMARK
-              const Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 14,
-              ),
+              Icon(Icons.check_circle, color: theme.colorScheme.tertiary, size: 14),
             ],
           ),
         ),
@@ -553,29 +584,33 @@ class LogisticsDraggablePanel extends StatelessWidget {
     );
   }
 // 5. SMALL HELPERS for reusable UI components
-  Widget _buildStatusBanner(String message) {
+  Widget _buildStatusBanner(BuildContext context, String message) {
+    final theme = Theme.of(context);
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.green.withValues(alpha: 0.08),
+        color: theme.colorScheme.primaryContainer.withValues(alpha: 0.2),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.green.withValues(alpha: 0.1)),
+        border: Border.all(color: theme.colorScheme.primaryContainer),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline, color: Colors.green, size: 16),
+          Icon(Icons.info_outline, color: theme.colorScheme.primary, size: 16),
           const SizedBox(width: 8),
           Expanded(
             child: Text(message,
-                style: TextStyle(color: Colors.green[700], fontSize: 11, fontWeight: FontWeight.bold)),
+                style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onPrimaryContainer,
+                    fontWeight: FontWeight.bold
+                )),
           ),
         ],
       ),
     );
   }
-
 }
+
+
 
 
 class _TicketStation extends StatelessWidget {
@@ -599,11 +634,13 @@ class _TicketStation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(
-      fontSize: 20,
+    final theme = Theme.of(context);
+
+    // Define the style based on the theme's text and surface colors
+    final textStyle = theme.textTheme.titleLarge?.copyWith(
       fontWeight: FontWeight.w900,
-      color: Color(0xFF1A1C1E),
-    );
+      color: theme.colorScheme.onSurface,
+    ) ?? const TextStyle();
 
     return Column(
       crossAxisAlignment: align,
@@ -611,28 +648,23 @@ class _TicketStation extends StatelessWidget {
       children: [
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.grey,
-            fontSize: 10,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: theme.colorScheme.outline,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.0,
           ),
         ),
         const SizedBox(height: 4),
 
-        // --- SMART ANIMATION LOGIC ---
         LayoutBuilder(
           builder: (context, constraints) {
             final String upperCity = city.toUpperCase();
-
-            // Measure the width of the text
             final textPainter = TextPainter(
               text: TextSpan(text: upperCity, style: textStyle),
               maxLines: 1,
               textDirection: TextDirection.ltr,
             )..layout();
 
-            // If text width > available width, use Marquee
             if (textPainter.width > constraints.maxWidth) {
               return SizedBox(
                 height: 28,
@@ -641,14 +673,13 @@ class _TicketStation extends StatelessWidget {
                   style: textStyle,
                   scrollAxis: Axis.horizontal,
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  blankSpace: 40.0, // Increased space for clarity
+                  blankSpace: 40.0,
                   velocity: 30.0,
                   pauseAfterRound: const Duration(seconds: 2),
                 ),
               );
             }
 
-            // Otherwise, just show normal text
             return SizedBox(
               height: 28,
               child: Text(
@@ -662,9 +693,8 @@ class _TicketStation extends StatelessWidget {
 
         Text(
           _getCityCode(city),
-          style: TextStyle(
-            color: Colors.grey[400],
-            fontSize: 14,
+          style: theme.textTheme.labelMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             fontWeight: FontWeight.bold,
           ),
         ),
@@ -685,13 +715,21 @@ class _InfoBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    // Use primary for highlights (the Gold/Orange) and onSurface for standard
+    final valueStyle = theme.textTheme.bodyLarge?.copyWith(
+      fontWeight: FontWeight.w800,
+      color: isHighlight ? theme.colorScheme.primary : theme.colorScheme.onSurface,
+    ) ?? const TextStyle();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
             label,
-            style: const TextStyle(
-                color: Colors.grey,
+            style: theme.textTheme.labelSmall?.copyWith(
+                color: theme.colorScheme.outline,
                 fontSize: 9,
                 fontWeight: FontWeight.bold
             )
@@ -702,11 +740,7 @@ class _InfoBlock extends StatelessWidget {
           child: value.length > 15
               ? Marquee(
             text: value.toUpperCase(),
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: isHighlight ? Colors.deepOrange : Colors.black,
-            ),
+            style: valueStyle,
             blankSpace: 20,
             velocity: 30,
             pauseAfterRound: const Duration(seconds: 2),
@@ -714,15 +748,10 @@ class _InfoBlock extends StatelessWidget {
               : Text(
             value.toUpperCase(),
             maxLines: 1,
-            style: TextStyle(
-              fontSize: 15,
-              fontWeight: FontWeight.w800,
-              color: isHighlight ? Colors.deepOrange : Colors.black,
-            ),
+            style: valueStyle,
           ),
         ),
       ],
     );
   }
 }
-
