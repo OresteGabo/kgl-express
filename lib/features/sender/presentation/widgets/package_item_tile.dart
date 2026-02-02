@@ -47,6 +47,7 @@ class PackageItemTile extends StatelessWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: ui.buildInputField(
+                  context: context,
                   controller: nameController,
                   hint: "What are you sending?",
                   onChanged: onNameChanged,
