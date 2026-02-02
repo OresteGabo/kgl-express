@@ -2,12 +2,12 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
+import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart';
 import 'package:kgl_express/models/order_model.dart';
 
 import 'package:kgl_express/features/sender/presentation/widgets/items_list.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/payment_summary.dart';
-import 'package:kgl_express/features/sender/presentation/widgets/track_button.dart';
 
 void showOrderDetailsSheet(BuildContext context, OrderModel order) {
   showModalBottomSheet(
@@ -50,7 +50,41 @@ class OrderDetailsContent extends StatelessWidget {
                   const Divider(height: 40),
                   PaymentSummary(order: order),
                   const SizedBox(height: 30),
-                  TrackButton(order: order),
+                  // Inside your Column...
+                  const SizedBox(height: 30),
+                  AppUI.factory.buildButton(
+                    context: context,
+                    onPressed: () {
+                      if (order.status == OrderStatus.inTransit) {
+                        // Handle Open Live Map logic here
+                      } else {
+                        Navigator.pop(context);
+                      }
+                    },
+                    // Dynamic color override based on state, otherwise defaults to Theme primary
+                    backgroundColor: order.status == OrderStatus.inTransit
+                        ? Theme.of(context).colorScheme.tertiary // Using tertiary for 'Live' status
+                        : null, // null defaults to theme.primary inside factory
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          order.status == OrderStatus.inTransit ? Icons.map : Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 10),
+                        Text(
+                          order.status == OrderStatus.inTransit ? "Open Live Map" : "Close Details",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 ],
               ),
             ),
