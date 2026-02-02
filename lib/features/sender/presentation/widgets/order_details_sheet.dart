@@ -1,8 +1,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:kgl_express/core/constants/mock_data.dart';
 import 'package:kgl_express/core/enums/order_status.dart';
+import 'package:kgl_express/core/enums/provider_type.dart';
 import 'package:kgl_express/core/presentation/ui_factory/platform_ui.dart';
+import 'package:kgl_express/core/utils/contact_utils.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/detail_row.dart';
 import 'package:kgl_express/models/order_model.dart';
 
@@ -120,7 +123,7 @@ class LiveDetailsHeader extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildTitleSection(theme),
-              _buildActionButtons(theme),
+              _buildActionButtons(context,theme),
             ],
           ),
           const SizedBox(height: 40),
@@ -194,24 +197,30 @@ class LiveDetailsHeader extends StatelessWidget {
           )
       )
   );
-  Widget _buildActionButtons(ThemeData theme) {
+  Widget _buildActionButtons(BuildContext context, ThemeData theme) {
+    final motar = allDummyProviders.firstWhere((provider) => provider.specialty == Speciality.deliverer);
     return Row(
       children: [
         // Message button: Subtle light-on-dark look
         _circleIconButton(
             theme,
             Icons.message_rounded,
-                () {},
+                () {
+                  ContactUtils.openWhatsApp(motar.phoneNumber, motar.name);
+                },
             isPrimary: false
         ),
         const SizedBox(width: 10),
         // Call button: High emphasis brand look
         _circleIconButton(
-            theme,
-            Icons.call,
-                () {},
-            isPrimary: true
+          theme,
+          Icons.call,
+              () {
+                ContactUtils.showCallOptions(context, motar);
+          },
+          isPrimary: true,
         ),
+
       ],
     );
   }
