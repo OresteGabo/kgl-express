@@ -132,9 +132,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           padding: const EdgeInsets.all(24.0),
           children: [
             const SectionHeader(title: "Delivery Details"),
-            ui.buildInputField(controller: _pickupController, hint: "Pickup Location", icon: Icons.location_on),
+            ui.buildInputField(context: context,controller: _pickupController, hint: "Pickup Location", icon: Icons.location_on),
             const LocationConnector(),
-            ui.buildInputField(controller: _destinationController, hint: "Destination", icon: Icons.flag),
+            ui.buildInputField(context: context, controller: _destinationController, hint: "Destination", icon: Icons.flag),
 
             const SizedBox(height: 40),
             const SectionHeader(title: "Package Items"),
@@ -222,6 +222,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         ],
       ),
       child: ui.buildButton(
+        context:context,
         onPressed: () {
           if (_formKey.currentState?.validate() ?? false) {
             // Handle order logic
