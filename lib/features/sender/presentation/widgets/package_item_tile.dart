@@ -24,25 +24,30 @@ class PackageItemTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final ui = AppUI.factory;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: ui.buildCardDecoration().copyWith(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey[200]!),
+        // Use surface color instead of white
+        color: theme.colorScheme.surface,
+        // Use outlineVariant for subtle borders
+        border: Border.all(color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 1. Top Row: Icon + Name Input + Delete
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.only(top: 12),
-                child: Icon(Icons.inventory_2_outlined, color: item.categoryColor),
+                child: Icon(
+                    Icons.inventory_2_outlined,
+                    color: _getGroupColor(context, item.compatibilityGroup)
+                ),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -54,7 +59,8 @@ class PackageItemTile extends StatelessWidget {
                 ),
               ),
               IconButton(
-                icon: const Icon(Icons.delete_sweep_outlined, color: Colors.redAccent),
+                // Use the semantic error color for destructive actions
+                icon: Icon(Icons.delete_sweep_outlined, color: theme.colorScheme.error),
                 onPressed: () => onRemove(index),
               ),
             ],
@@ -62,30 +68,27 @@ class PackageItemTile extends StatelessWidget {
 
           const SizedBox(height: 16),
 
-          // 2. Quantity and Safety Row
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              // Quantity "Pill" - separated - and + for better UX
-              _buildCounterPill(),
-              // Mini labels for groups
-              _buildCompactCompatibility(item.compatibilityGroup),
+              _buildCounterPill(context),
+              _buildCompactCompatibility(context, item.compatibilityGroup),
             ],
           ),
 
-          const Divider(height: 24),
+          Divider(height: 24, color: theme.colorScheme.outlineVariant),
 
-          // 3. Safety Selection
-          _buildGroupPicker(),
+          _buildGroupPicker(context),
         ],
       ),
     );
   }
 
-  Widget _buildCounterPill() {
+  Widget _buildCounterPill(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[100],
+        color: theme.colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(25),
       ),
       child: Row(
@@ -93,16 +96,22 @@ class PackageItemTile extends StatelessWidget {
         children: [
           IconButton(
             visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.remove, size: 18),
+            icon: Icon(Icons.remove, size: 18, color: theme.colorScheme.onSurface),
             onPressed: item.quantity > 1 ? () => onQtyChanged(index, item.quantity - 1) : null,
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8),
-            child: Text("${item.quantity}", style: const TextStyle(fontWeight: FontWeight.bold)),
+            child: Text(
+                "${item.quantity}",
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: theme.colorScheme.onSurface,
+                )
+            ),
           ),
           IconButton(
             visualDensity: VisualDensity.compact,
-            icon: const Icon(Icons.add, size: 18),
+            icon: Icon(Icons.add, size: 18, color: theme.colorScheme.onSurface),
             onPressed: () => onQtyChanged(index, item.quantity + 1),
           ),
         ],
@@ -110,19 +119,31 @@ class PackageItemTile extends StatelessWidget {
     );
   }
 
-  Widget _buildGroupPicker() {
+  Widget _buildGroupPicker(BuildContext context) {
+    final theme = Theme.of(context);
     return SingleChildScrollView(
       scrollDirection: Axis.horizontal,
       child: Row(
         children: CompatibilityGroup.values.map((group) {
+          final isSelected = item.compatibilityGroup == group;
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: ChoiceChip(
-              avatar: Icon(_getIcon(group), size: 14,
-                  color: item.compatibilityGroup == group ? Colors.white : Colors.black54),
-              label: Text(group.name, style: const TextStyle(fontSize: 12)),
-              selected: item.compatibilityGroup == group,
-              selectedColor: Colors.black,
+              avatar: Icon(
+                  _getIcon(group),
+                  size: 14,
+                  color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant
+              ),
+              showCheckmark: false,
+              label: Text(
+                  group.name,
+                  style: theme.textTheme.labelMedium?.copyWith(
+                      color: isSelected ? theme.colorScheme.onPrimary : theme.colorScheme.onSurfaceVariant
+                  )
+              ),
+              selected: isSelected,
+              selectedColor: theme.colorScheme.primary,
+              backgroundColor: theme.colorScheme.surfaceContainerLow,
               onSelected: (val) => val ? onGroupChanged(group) : null,
             ),
           );
@@ -136,25 +157,27 @@ class PackageItemTile extends StatelessWidget {
     if (group == CompatibilityGroup.hazardous) return Icons.warning_amber_rounded;
     return Icons.verified_user_outlined;
   }
-  Widget _buildCompactCompatibility(CompatibilityGroup group) {
+
+  Widget _buildCompactCompatibility(BuildContext context, CompatibilityGroup group) {
+    final themeColor = _getGroupColor(context, group);
+    final theme = Theme.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        // Using the modern withValues for the background tint
-        color: _getGroupColor(group).withValues(alpha: 0.1),
+        color: themeColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(_getIcon(group), size: 14, color: _getGroupColor(group)),
+          Icon(_getIcon(group), size: 14, color: themeColor),
           const SizedBox(width: 4),
           Text(
             group.name.toUpperCase(),
-            style: TextStyle(
-              fontSize: 10,
+            style: theme.textTheme.labelSmall?.copyWith(
               fontWeight: FontWeight.bold,
-              color: _getGroupColor(group),
+              color: themeColor,
               letterSpacing: 0.5,
             ),
           ),
@@ -163,14 +186,17 @@ class PackageItemTile extends StatelessWidget {
     );
   }
 
-  Color _getGroupColor(CompatibilityGroup group) {
+  Color _getGroupColor(BuildContext context, CompatibilityGroup group) {
+    final theme = Theme.of(context);
     switch (group) {
       case CompatibilityGroup.hazardous:
-        return Colors.orange[800]!;
+        return theme.colorScheme.error; // Red/Orange for danger
       case CompatibilityGroup.fragile:
-        return Colors.blue[700]!;
+        return theme.colorScheme.primary; // Brand color for attention
       case CompatibilityGroup.safe:
-      return Colors.green[700]!;
+        return theme.colorScheme.tertiary; // Green/Teal for safe
     }
   }
+
+
 }
