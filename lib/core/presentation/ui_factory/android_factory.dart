@@ -7,12 +7,6 @@ import 'package:url_launcher/url_launcher.dart';
 
 class AndroidFactory implements UIFactory {
   @override
-  Color get primaryColor => const Color(0xFF1A1A1A);
-  @override
-  Color get surfaceColor => throw UnimplementedError();
-
-
-  @override
   PreferredSizeWidget buildAppBar({
     required String title,
     Widget? leading,
