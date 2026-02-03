@@ -38,6 +38,13 @@ Advanced service discovery and order creation with intelligent category splittin
   <img src="screenshots/create_new_delivery.png" width="30%" alt="Create Delivery" />
 </p>
 
+### 🚌 Transport & Mobility
+Dedicated solutions for city-wide commuting and long-distance travel.
+<p align="center">
+  <img src="screenshots/kigali_city_transport.png" width="45%" alt="Kigali City Transport" />
+  <img src="screenshots/upcountry_transport.png" width="45%" alt="Upcountry Transport" />
+</p>
+
 ### 🎥 Experience it in Action
 [**Watch the Demo Video**](screenshots/demo.webm)
 
@@ -108,6 +115,7 @@ KGL Express follows a **feature-first, modular Flutter architecture**:
 │   ├── icons/              # Payment logos (MoMo, BK, Tap&Go, etc.)
 │   ├── kigali_map.db       # Offline SQLite map tiles
 │   └── map1.osm            # Raw OpenStreetMap data
+├── docs/                   # Project documentation, contracts, and negotiations (LaTeX)
 ├── lib/
 │   ├── core/
 │   │   ├── enums/          # PaymentMethod, OrderStatus, ProviderType
