@@ -614,7 +614,7 @@ class LogisticsDraggablePanel extends StatelessWidget {
                 Padding(
                   padding: const EdgeInsets.only(right: 6.0),
                   child: Icon(
-                    ticket.paymentMethod.icon ?? Icons.account_balance_wallet,
+                    ticket.paymentMethod.icon ,
                     color: Colors.green[700],
                     size: 14,
                   ),
