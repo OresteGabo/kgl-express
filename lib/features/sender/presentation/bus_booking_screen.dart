@@ -554,15 +554,6 @@ class _BusBookingScreenState extends State<BusBookingScreen> {
 
   // --- SUPPORTING UI WIDGETS ---
 
-  Widget _buildCityBusTile(String operator, String route, String eta) {
-    return ListTile(
-      leading: const Icon(Icons.bus_alert, color: Colors.blue),
-      title: Text(operator, style: const TextStyle(fontWeight: FontWeight.bold)),
-      subtitle: Text(route),
-      trailing: Text(eta, style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
-    );
-  }
-
   Widget _buildTimeChip(BusSchedule schedule) {
     final theme = Theme.of(context);
     bool hasLiveInfo = schedule.lastSeenLocation != null;
