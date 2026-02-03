@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kgl_express/features/sender/presentation/bus_booking_screen.dart';
 import 'package:kgl_express/features/sender/presentation/service_selection_screen.dart';
 import 'package:kgl_express/features/sender/presentation/create_order_screen.dart';
 import 'package:kgl_express/features/sender/presentation/widgets/quick_action_card.dart';
@@ -51,7 +52,11 @@ class QuickActionsGrid extends StatelessWidget {
                 title: "Transport", // "Mobility" or "Travel" also work well
                 icon: Icons.explore_outlined, // Compass or Route icon feels more "super-app"
                 color: Colors.deepOrange[700]!,
-                onTap: () {
+                onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const BusBookingScreen())
+                ),
+
                   /**
                    * TODO: Implement Transport & Travel Hub
                    * * UI STRUCTURE:
@@ -68,7 +73,7 @@ class QuickActionsGrid extends StatelessWidget {
                    * - Payment: MOMO/Airtel Money (Push USSD).
                    * - Ticket: QR code generation for offline scanning.
                    * */
-                },
+
               ),
               QuickActionCard(
                 title: "Real Estate",
